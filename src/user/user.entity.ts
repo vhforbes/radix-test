@@ -9,7 +9,7 @@ import {
 @Entity('user')
 class User {
   @PrimaryGeneratedColumn('uuid')
-  user_id: string;
+  id: string;
 
   @Column('varchar')
   name: string;

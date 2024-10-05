@@ -5,15 +5,15 @@ import User from './user.entity';
 export class UserService {
   private readonly users: User[] = [
     {
-      user_id: 'uuid',
+      id: 'uuid',
       name: 'User Name',
-      email: 'email@email.com',
-      password: 'changeme',
+      email: 'vhforbes@gmail.com',
+      password: '170496',
       created_at: new Date(),
       updated_at: new Date(),
     },
     {
-      user_id: 'uuid',
+      id: 'uuid',
       name: 'User Name2',
       email: 'email2@email.com',
       password: 'changeme',
