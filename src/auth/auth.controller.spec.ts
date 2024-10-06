@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
-export const userMock = {
+const userMock = {
   id: 'uuid',
   name: 'User Name',
   email: 'vhforbes@gmail.com',

@@ -21,11 +21,13 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User) {
+  async login(user: User): Promise<{
+    access_token: string;
+  }> {
     const payload = { email: user.email, name: user.name, sub: user.id };
 
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: await this.jwtService.signAsync(payload),
     };
   }
 }
