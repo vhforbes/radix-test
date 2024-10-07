@@ -3,9 +3,12 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthDto } from './auth.validator';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh.auth.guard';
 
 @Controller('auth')
 export class AuthController {
+  // TODO (SECURITY): Save refresh on DB when created and invalidate it when refreshed
+
   constructor(private authService: AuthService) {}
 
   @UseGuards(LocalAuthGuard)
@@ -20,5 +23,11 @@ export class AuthController {
   @Post('profile')
   getProfile(@Request() req) {
     return req.user;
+  }
+
+  @UseGuards(JwtRefreshAuthGuard)
+  @Post('refresh')
+  refreshToken(@Request() req) {
+    return this.authService.login(req.user);
   }
 }

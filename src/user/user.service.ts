@@ -1,8 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import User from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './user.validator';
+import * as bycript from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -18,7 +23,7 @@ export class UserService {
   }
 
   async create(user: CreateUserDto): Promise<any> {
-    const userExists = this.userRepository.findOneBy({
+    const userExists = await this.userRepository.findOneBy({
       email: user.email,
     });
 
@@ -26,10 +31,28 @@ export class UserService {
       throw new BadRequestException('User already exists');
     }
 
-    const createdUser = this.userRepository.create(user);
+    const userToCreate = this.userRepository.create(user);
 
-    await this.userRepository.save(createdUser);
+    const saltRounds = 10;
 
-    return createdUser;
+    bycript.genSalt(saltRounds, (err, salt) => {
+      if (err) {
+        throw new InternalServerErrorException(
+          'Error generating password salt',
+        );
+      }
+
+      bycript.hash(user.password, salt, async (err, hash) => {
+        if (err) {
+          throw new InternalServerErrorException('Error hashing password salt');
+        }
+
+        userToCreate.password = hash;
+
+        await this.userRepository.save(userToCreate);
+      });
+    });
+
+    return userToCreate;
   }
 }
