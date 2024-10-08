@@ -2,7 +2,7 @@ import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { AuthDto } from './auth.validator';
+import { AuthDto, ResetPassDto } from './auth.validator';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh.auth.guard';
 
 @Controller('auth')
@@ -29,5 +29,15 @@ export class AuthController {
   @Post('refresh')
   refreshToken(@Request() req) {
     return this.authService.login(req.user);
+  }
+
+  @Post('recover')
+  recoverPassword(@Request() @Body() body: { email: string }) {
+    return this.authService.recoverPassword(body.email);
+  }
+
+  @Post('reset')
+  resetPassword(@Request() @Body() body: ResetPassDto) {
+    return this.authService.resetPassword(body);
   }
 }

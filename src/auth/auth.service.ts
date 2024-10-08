@@ -3,7 +3,8 @@ import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import User from '@src/user/user.entity';
 import { ConfigService } from '@nestjs/config';
-import * as bycript from 'bcrypt';
+import * as bcrypt from 'bcrypt';
+import { ResetPassDto } from './auth.validator';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +17,7 @@ export class AuthService {
   async validateUser(username: string, password: string): Promise<any> {
     const user = await this.usersService.findOne(username);
 
-    const authorized = bycript.compareSync(password, user.password);
+    const authorized = bcrypt.compareSync(password, user.password);
 
     if (authorized) {
       const { ...result } = user;
@@ -35,11 +36,54 @@ export class AuthService {
     return {
       access_token: await this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('JWT_SECRET'),
+        expiresIn: '15m',
       }),
 
       refresh_token: await this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: '7d',
       }),
     };
+  }
+
+  async recoverPassword(email: string): Promise<any> {
+    const user = await this.usersService.findOne(email);
+
+    if (!user) {
+      console.error(`User ${email} requesting password change don't exist`);
+      return 'TO BE IMPLEMENTED no user';
+    }
+
+    const token = await this.jwtService.signAsync(
+      { email },
+      {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: '30m',
+      },
+    );
+
+    console.log(token);
+
+    // TODO: Call here service where it creates a valid token and stores it
+    return 'TO BE IMPLEMENTED user found';
+  }
+
+  async resetPassword({ newPassword, token }: ResetPassDto): Promise<any> {
+    try {
+      const decoded = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      });
+
+      // TODO: Hash and save user password
+
+      console.log(newPassword);
+
+      console.log('Token is valid:', decoded);
+
+      return decoded;
+    } catch (err) {
+      console.error('Invalid or expired token', err);
+      return null;
+    }
   }
 }
