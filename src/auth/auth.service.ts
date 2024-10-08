@@ -17,13 +17,12 @@ export class AuthService {
   async validateUser(username: string, password: string): Promise<any> {
     const user = await this.usersService.findOne(username);
 
-    const authorized = bcrypt.compareSync(password, user.password);
+    try {
+      const authorized = await bcrypt.compare(password, user.password);
 
-    if (authorized) {
-      const { ...result } = user;
-      return result;
-    } else {
-      return null;
+      return authorized;
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -62,10 +61,8 @@ export class AuthService {
       },
     );
 
-    console.log(token);
-
-    // TODO: Call here service where it creates a valid token and stores it
-    return 'TO BE IMPLEMENTED user found';
+    // TODO: Call here service where it sends the token to the user
+    return token;
   }
 
   async resetPassword({ newPassword, token }: ResetPassDto): Promise<any> {

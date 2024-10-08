@@ -1,19 +1,16 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import User from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './user.validator';
-import * as bycript from 'bcrypt';
+import { hashPassword } from '@src/utils/hash-password';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private logger: Logger,
   ) {}
 
   async findOne(username: string): Promise<User | undefined> {
@@ -33,25 +30,11 @@ export class UserService {
 
     const userToCreate = this.userRepository.create(user);
 
-    const saltRounds = 10;
+    userToCreate.password = await hashPassword(user.password);
 
-    bycript.genSalt(saltRounds, (err, salt) => {
-      if (err) {
-        throw new InternalServerErrorException(
-          'Error generating password salt',
-        );
-      }
+    await this.userRepository.save(userToCreate);
 
-      bycript.hash(user.password, salt, async (err, hash) => {
-        if (err) {
-          throw new InternalServerErrorException('Error hashing password salt');
-        }
-
-        userToCreate.password = hash;
-
-        await this.userRepository.save(userToCreate);
-      });
-    });
+    this.logger.log('Created user: ', { userToCreate });
 
     return userToCreate;
   }

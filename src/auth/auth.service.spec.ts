@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { UserService } from '@src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -31,33 +33,43 @@ describe('AuthService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService, userServiceMock, jwtServiceMock],
+      providers: [AuthService, userServiceMock, jwtServiceMock, ConfigService],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks(); // Clears all mock calls and instances after each test
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('should validate the user password and return the user', async () => {
+  it('should validate the user password and return true', async () => {
     userServiceMock.useValue.findOne.mockResolvedValue(userMock);
+
+    const bcryptCompare = jest.fn().mockResolvedValue(true);
+    (bcrypt.compare as jest.Mock) = bcryptCompare;
 
     const result = await service.validateUser(
       userMock.email,
       userMock.password,
     );
 
-    expect(result).toEqual(userMock);
+    expect(result).toBeTruthy();
   });
 
-  it('should return null if the password or email is incorrect', async () => {
+  it('should validate the user password and return false', async () => {
     userServiceMock.useValue.findOne.mockResolvedValue(userMock);
+
+    const bcryptCompare = jest.fn().mockResolvedValue(false);
+    (bcrypt.compare as jest.Mock) = bcryptCompare;
 
     const result = await service.validateUser('wrong@email.com', 'wrongpass');
 
-    expect(result).toBeNull();
+    expect(result).toBeFalsy();
   });
 
   it('should return the user access_token', async () => {
@@ -65,10 +77,9 @@ describe('AuthService', () => {
 
     const result = await service.login(userMock);
 
-    console.log(result);
-
     expect(result).toEqual({
       access_token: 'valid_jwt',
+      refresh_token: 'valid_jwt',
     });
   });
 });

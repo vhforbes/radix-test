@@ -40,7 +40,13 @@ describe('AuthController', () => {
       access_token: 'validToken',
     });
 
-    const result = await controller.login(userMock);
+    const result = await controller.login(
+      {},
+      {
+        username: 'test@email.com',
+        password: '12345',
+      },
+    );
     expect(result).toEqual({ access_token: 'validToken' });
   });
 
@@ -52,7 +58,13 @@ describe('AuthController', () => {
 
     authServiceMock.useValue.login.mockResolvedValue(unauthorizedRes);
 
-    const result = await controller.login(userMock);
+    const result = await controller.login(
+      {},
+      {
+        username: 'test@email.com',
+        password: '12345',
+      },
+    );
     expect(result).toEqual(unauthorizedRes);
   });
 });
