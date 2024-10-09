@@ -32,7 +32,7 @@ export class AuthService {
     }
   }
 
-  async login(user: User): Promise<{
+  async login(user: Partial<User>): Promise<{
     access_token: string;
     refresh_token: string;
   }> {

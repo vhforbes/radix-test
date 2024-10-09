@@ -68,6 +68,7 @@ export class CommunityService {
   }
 
   update(id: number, updateCommunityDto: UpdateCommunityDto) {
+    console.log(updateCommunityDto);
     return `This action updates a #${id} community`;
   }
 

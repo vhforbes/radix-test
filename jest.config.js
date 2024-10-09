@@ -1,7 +1,7 @@
 module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
 
-  rootDir: 'src',
+  rootDir: '.',
   testRegex: '.*\\.spec\\.ts$',
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
@@ -11,6 +11,7 @@ module.exports = {
   testEnvironment: 'node',
 
   moduleNameMapper: {
-    '^@src/(.*)$': '<rootDir>/$1', // Use @src as alias to map to src folder
+    '^@src/(.*)$': '<rootDir>/src/$1', // Use @src as alias to map to src folder
+    '^@test/(.*)$': '<rootDir>/test/$1', // Use @src as alias to map to src folder
   },
 };
