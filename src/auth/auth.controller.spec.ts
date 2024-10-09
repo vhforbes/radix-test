@@ -2,15 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
-const userMock = {
-  id: 'uuid',
-  name: 'User Name',
-  email: 'vhforbes@gmail.com',
-  password: '170496',
-  created_at: new Date(),
-  updated_at: new Date(),
-};
-
 // Mocking this so i dont need to have all the authService providers aswell
 const authServiceMock = {
   provide: AuthService,
