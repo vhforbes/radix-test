@@ -1,6 +1,13 @@
 import Community from '@src/community/community.entity';
 import User from '@src/user/user.entity';
-import { Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Role } from './roles.enum';
 
 @Entity()
 export class Membership {
@@ -12,4 +19,16 @@ export class Membership {
 
   @ManyToOne(() => Community, (community) => community.memberships)
   community: Community;
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.MEMBER,
+  })
+  role: Role;
+
+  @CreateDateColumn({ type: 'timestamptz' })
+  joined_at: Date;
+
+  // TODO: Subscription Module
 }

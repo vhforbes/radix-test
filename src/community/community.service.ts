@@ -1,19 +1,70 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
+import { UserReq } from '@src/auth/interfaces';
+import { UserService } from '@src/user/user.service';
+import { Repository } from 'typeorm';
+import Community from './community.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CommunityDto } from './dto/community.dto';
 
 @Injectable()
 export class CommunityService {
-  create(createCommunityDto: CreateCommunityDto) {
-    return 'This action adds a new community';
+  constructor(
+    @InjectRepository(Community)
+    private communityRepository: Repository<Community>,
+    private userService: UserService,
+  ) {}
+
+  async create(userReq: UserReq, createCommunityDto: CreateCommunityDto) {
+    const user = await this.userService.findOne(userReq.email);
+
+    const nameAlreadyExists = await this.communityRepository.findOneBy({
+      name: createCommunityDto.name,
+    });
+
+    console.log(nameAlreadyExists);
+
+    if (nameAlreadyExists) {
+      throw new ConflictException('Comunity name already exists');
+    }
+
+    const community = this.communityRepository.create({
+      name: createCommunityDto.name,
+      owner: user,
+    });
+
+    await this.communityRepository.save(community);
+
+    delete community.owner;
+
+    return community;
   }
 
-  findAll() {
-    return `This action returns all community`;
+  async findAll() {
+    return await this.communityRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} community`;
+  async findOne(id: string) {
+    const community = await this.communityRepository.findOne({
+      where: {
+        id,
+      },
+      relations: ['owner'],
+    });
+
+    if (!community) {
+      throw new Error('Community not found');
+    }
+
+    const communityDto: CommunityDto = {
+      ...community,
+      owner: {
+        name: community.owner.name,
+      },
+    };
+
+    return communityDto;
   }
 
   update(id: number, updateCommunityDto: UpdateCommunityDto) {

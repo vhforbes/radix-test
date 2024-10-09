@@ -20,7 +20,13 @@ export class AuthService {
     try {
       const authorized = await bcrypt.compare(password, user.password);
 
-      return authorized;
+      if (authorized) {
+        console.log(user);
+
+        return user;
+      } else {
+        return null;
+      }
     } catch (error) {
       console.error(error);
     }
@@ -35,7 +41,7 @@ export class AuthService {
     return {
       access_token: await this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('JWT_SECRET'),
-        expiresIn: '15m',
+        expiresIn: '15d',
       }),
 
       refresh_token: await this.jwtService.signAsync(payload, {

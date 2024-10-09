@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 
-export class CreateCommunityDto {
+export class UnsensitiveUserDto {
   @IsString()
   name: string;
 }

@@ -17,7 +17,7 @@ class Community {
   @Column()
   name: string;
 
-  @ManyToOne(() => User, (user) => user.comunities_owned)
+  @ManyToOne(() => User, (user) => user.comunities_owned, { nullable: false })
   @JoinColumn({ name: 'owner_id' })
   owner: User;
 
