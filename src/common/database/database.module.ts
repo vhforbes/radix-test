@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import Comunity from '@src/community/comunity.entity';
 import User from 'src/user/user.entity';
 
 @Module({
@@ -16,7 +17,7 @@ import User from 'src/user/user.entity';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
         synchronize: true, // Set to false in production
-        entities: [User],
+        entities: [User, Comunity],
       }),
     }),
   ],

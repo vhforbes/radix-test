@@ -1,7 +1,9 @@
+import Comunity from '@src/community/comunity.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -19,6 +21,9 @@ class User {
 
   @Column('varchar')
   password: string;
+
+  @OneToMany(() => Comunity, (comunity) => comunity.owner)
+  comunities_owned: Comunity[];
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
