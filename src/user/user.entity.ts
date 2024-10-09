@@ -1,4 +1,5 @@
-import Comunity from '@src/community/comunity.entity';
+import Comunity from '@src/community/community.entity';
+import { Membership } from '@src/membership/membership.entity';
 import {
   Column,
   CreateDateColumn,
@@ -24,6 +25,9 @@ class User {
 
   @OneToMany(() => Comunity, (comunity) => comunity.owner)
   comunities_owned: Comunity[];
+
+  @OneToMany(() => Membership, (membership) => membership.user)
+  memberships: Membership[];
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;

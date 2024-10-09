@@ -4,6 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CommunityModule } from './community/community.module';
+import { MembershipModule } from './membership/membership.module';
+
 import { LoggerModule } from 'nestjs-pino';
 
 @Module({
@@ -28,6 +30,7 @@ import { LoggerModule } from 'nestjs-pino';
     UserModule,
     AuthModule,
     CommunityModule,
+    MembershipModule,
   ],
   controllers: [],
   providers: [],

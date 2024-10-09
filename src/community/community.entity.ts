@@ -1,14 +1,16 @@
+import { Membership } from '@src/membership/membership.entity';
 import User from '@src/user/user.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity('comunity')
-class Comunity {
+class Community {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -18,6 +20,9 @@ class Comunity {
   @ManyToOne(() => User, (user) => user.comunities_owned)
   @JoinColumn({ name: 'owner_id' })
   owner: User;
+
+  @OneToMany(() => Membership, (membership) => membership.community)
+  memberships: Membership[];
 }
 
-export default Comunity;
+export default Community;

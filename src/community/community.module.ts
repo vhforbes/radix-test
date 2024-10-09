@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ManageModule } from './manage/manage.module';
-import { ContentModule } from './content/content.module';
+import { CommunityService } from './community.service';
+import { CommunityController } from './community.controller';
 
 @Module({
-  imports: [ManageModule, ContentModule]
+  controllers: [CommunityController],
+  providers: [CommunityService],
 })
 export class CommunityModule {}
