@@ -7,7 +7,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Role } from './roles.enum';
+import { MembershipRole } from './membership-roles.enum';
 
 @Entity()
 export class Membership {
@@ -22,10 +22,10 @@ export class Membership {
 
   @Column({
     type: 'enum',
-    enum: Role,
-    default: Role.MEMBER,
+    enum: MembershipRole,
+    default: MembershipRole.MEMBER,
   })
-  role: Role;
+  role: MembershipRole;
 
   @CreateDateColumn({ type: 'timestamptz' })
   joined_at: Date;

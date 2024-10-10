@@ -7,6 +7,7 @@ import { CommunityModule } from './community/community.module';
 import { MembershipModule } from './membership/membership.module';
 
 import { LoggerModule } from 'nestjs-pino';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { LoggerModule } from 'nestjs-pino';
     AuthModule,
     CommunityModule,
     MembershipModule,
+    NotificationModule,
   ],
   controllers: [],
   providers: [],

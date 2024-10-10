@@ -24,6 +24,8 @@ export class MembershipController {
   ) {
     // Will I validate the payment here in membership or have a separate Moule?
 
+    // Ill need to have the payment logic setup to approve members
+
     //  Maybe the same it looks like I'm separating way too much early on...
 
     return 'Join community TBI';

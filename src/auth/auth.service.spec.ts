@@ -47,7 +47,7 @@ describe('AuthService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks(); // Clears all mock calls and instances after each test
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {

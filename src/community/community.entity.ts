@@ -8,6 +8,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { CommunityStatus } from './community-status.enum.dto';
 
 @Entity('community')
 class Community {
@@ -16,6 +17,14 @@ class Community {
 
   @Column({ nullable: false })
   name: string;
+
+  @Column({
+    type: 'enum',
+    enum: CommunityStatus,
+    default: CommunityStatus.PENDING_APPROVAL,
+    nullable: false,
+  })
+  status: CommunityStatus;
 
   @Column('decimal', { nullable: false, precision: 10, scale: 2 })
   monthly_price: number;
