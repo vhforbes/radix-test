@@ -4,6 +4,7 @@ import { UserService } from '@src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { Logger } from '@nestjs/common';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -33,7 +34,13 @@ describe('AuthService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthService, userServiceMock, jwtServiceMock, ConfigService],
+      providers: [
+        AuthService,
+        userServiceMock,
+        jwtServiceMock,
+        ConfigService,
+        Logger,
+      ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);

@@ -13,7 +13,9 @@ import { CommunityService } from './community.service';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('community')
 @Controller('community')
 export class CommunityController {
   constructor(private readonly communityService: CommunityService) {}

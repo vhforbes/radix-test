@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import User from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 
 import { hashPassword } from '@src/utils/hash-password';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -14,16 +14,16 @@ export class UserService {
     private logger: Logger,
   ) {}
 
-  async findOne(username: string): Promise<User | undefined> {
-    const user = this.userRepository.findOneBy({ email: username });
+  async findOne(email: string): Promise<User | null> {
+    const user = await this.userRepository.findOneBy({
+      email: email ? email : IsNull(),
+    });
 
     return user;
   }
 
   async create(user: CreateUserDto): Promise<any> {
-    const userExists = await this.userRepository.findOneBy({
-      email: user.email,
-    });
+    const userExists = await this.findOne(user.email);
 
     if (userExists) {
       throw new BadRequestException('User already exists');
@@ -38,5 +38,17 @@ export class UserService {
     this.logger.log('Created user: ', { userToCreate });
 
     return userToCreate;
+  }
+
+  async updatePassword(email: string, newPassword: string): Promise<any> {
+    const userToUpdate = await this.findOne(email);
+
+    userToUpdate.password = newPassword;
+
+    const updatedUser = await this.userRepository.save(userToUpdate);
+
+    this.logger.log('Updated password of user ', userToUpdate);
+
+    return updatedUser;
   }
 }

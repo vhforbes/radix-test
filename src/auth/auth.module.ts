@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
@@ -13,6 +13,7 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
   imports: [
     UserModule,
     PassportModule,
+
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -27,6 +28,7 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
     JwtStrategy,
     JwtRefreshStrategy,
     ConfigService,
+    Logger,
   ],
   controllers: [AuthController],
 })

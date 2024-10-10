@@ -2,9 +2,12 @@ import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { AuthDto, ResetPassDto } from './auth.validator';
 import { JwtRefreshAuthGuard } from './guards/jwt-refresh.auth.guard';
+import { ApiTags } from '@nestjs/swagger';
+import { AuthDto } from './dtos/auth.dto';
+import { ResetPassDto } from './dtos/reset-password.dto';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   // TODO (SECURITY): Save refresh on DB when created and invalidate it when refreshed
@@ -32,12 +35,12 @@ export class AuthController {
   }
 
   @Post('recover')
-  recoverPassword(@Request() @Body() body: { email: string }) {
+  recoverPassword(@Body() body: { email: string }) {
     return this.authService.recoverPassword(body.email);
   }
 
   @Post('reset')
-  resetPassword(@Request() @Body() body: ResetPassDto) {
+  resetPassword(@Body() body: ResetPassDto) {
     return this.authService.resetPassword(body);
   }
 }

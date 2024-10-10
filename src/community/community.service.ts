@@ -3,7 +3,7 @@ import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
 import { UserReq } from '@src/auth/interfaces';
 import { UserService } from '@src/user/user.service';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import Community from './community.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommunityDto } from './dto/community.dto';
@@ -20,10 +20,8 @@ export class CommunityService {
     const user = await this.userService.findOne(userReq.email);
 
     const nameAlreadyExists = await this.communityRepository.findOneBy({
-      name: createCommunityDto.name,
+      name: createCommunityDto.name ?? IsNull(),
     });
-
-    console.log(nameAlreadyExists);
 
     if (nameAlreadyExists) {
       throw new ConflictException('Comunity name already exists');
@@ -68,8 +66,7 @@ export class CommunityService {
   }
 
   update(id: number, updateCommunityDto: UpdateCommunityDto) {
-    console.log(updateCommunityDto);
-    return `This action updates a #${id} community`;
+    return `This action updates a #${id} community ${updateCommunityDto}`;
   }
 
   remove(id: number) {

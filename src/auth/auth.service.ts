@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import User from '@src/user/user.entity';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { ResetPassDto } from './auth.validator';
+import { ResetPassDto } from './dtos/reset-password.dto';
+import { hashPassword } from '@src/utils/hash-password';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,7 @@ export class AuthService {
     private usersService: UserService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private logger: Logger,
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
@@ -21,8 +23,6 @@ export class AuthService {
       const authorized = await bcrypt.compare(password, user.password);
 
       if (authorized) {
-        console.log(user);
-
         return user;
       } else {
         return null;
@@ -55,38 +55,41 @@ export class AuthService {
     const user = await this.usersService.findOne(email);
 
     if (!user) {
-      console.error(`User ${email} requesting password change don't exist`);
-      return 'TO BE IMPLEMENTED no user';
+      this.logger.warn('User not found trying to recover', email);
+      return;
     }
 
     const token = await this.jwtService.signAsync(
       { email },
       {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        secret: this.configService.get<string>('JWT_RECOVER_SECRET'),
         expiresIn: '30m',
       },
     );
 
-    // TODO: Call here service where it sends the token to the user
+    // TODO: Call here messaging service where it sends the token to the user
     return token;
   }
 
   async resetPassword({ newPassword, token }: ResetPassDto): Promise<any> {
     try {
       const decoded = await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        secret: this.configService.get<string>('JWT_RECOVER_SECRET'),
       });
 
-      // TODO: Hash and save user password
+      console.log(decoded);
 
-      console.log(newPassword);
+      const hashedPass = await hashPassword(newPassword);
 
-      console.log('Token is valid:', decoded);
+      this.usersService.updatePassword(decoded.email, hashedPass);
 
       return decoded;
     } catch (err) {
-      console.error('Invalid or expired token', err);
-      return null;
+      this.logger.error(
+        'Invalid or expired token when resetting password',
+        err,
+      );
+      throw new UnauthorizedException('Invalid or expired token');
     }
   }
 }

@@ -14,11 +14,11 @@ class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('varchar')
-  name: string;
+  @Column({ type: 'varchar', unique: true })
+  email: string;
 
   @Column('varchar')
-  email: string;
+  name: string;
 
   @Column('varchar')
   password: string;
