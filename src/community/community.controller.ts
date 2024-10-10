@@ -46,4 +46,9 @@ export class CommunityController {
   remove(@Param('id') id: string) {
     return this.communityService.remove(+id);
   }
+
+  @Get(':id')
+  joinCommunity(@Param('id') id: string) {
+    return this.communityService.findOne(id);
+  }
 }
