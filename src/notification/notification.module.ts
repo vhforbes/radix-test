@@ -3,7 +3,8 @@ import { NotificationService } from './notification.service';
 import { EmailModule } from './email/email.module';
 
 @Module({
-  providers: [NotificationService],
   imports: [EmailModule],
+  providers: [NotificationService],
+  exports: [NotificationService],
 })
 export class NotificationModule {}

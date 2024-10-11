@@ -5,6 +5,7 @@ import { IsNull, Repository } from 'typeorm';
 
 import { hashPassword } from '@src/utils/hash-password';
 import { CreateUserDto } from './dtos/create-user.dto';
+import { NotificationService } from '@src/notification/notification.service';
 
 @Injectable()
 export class UserService {
@@ -12,6 +13,7 @@ export class UserService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private logger: Logger,
+    private notificationService: NotificationService,
   ) {}
 
   async findOne(email: string): Promise<User | null> {
@@ -36,6 +38,8 @@ export class UserService {
     await this.userRepository.save(userToCreate);
 
     this.logger.log('Created user: ', { userToCreate });
+
+    this.notificationService.sendNotification();
 
     return userToCreate;
   }

@@ -1,12 +1,17 @@
 import { SESv2 } from '@aws-sdk/client-sesv2';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectAws } from 'aws-sdk-v3-nest';
 
 @Injectable()
 export class EmailService {
-  constructor(@InjectAws(SESv2) private readonly sesClient: SESv2) {}
+  constructor(
+    @InjectAws(SESv2) private readonly sesClient: SESv2,
+    private readonly logger: Logger,
+  ) {}
 
   async sendEmail() {
+    this.logger.log('Sending email trough SES');
+
     const content = {
       FromEmailAddress: 'victor@victorhugoforbes.com',
       Destination: {
@@ -34,6 +39,13 @@ export class EmailService {
       },
     };
 
-    await this.sesClient.sendEmail(content);
+    try {
+      await this.sesClient.sendEmail(content);
+    } catch (error) {
+      this.logger.error('Could not send email ', {
+        error: error,
+        message: error.message,
+      });
+    }
   }
 }

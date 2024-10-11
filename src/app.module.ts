@@ -5,26 +5,11 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CommunityModule } from './community/community.module';
 import { MembershipModule } from './membership/membership.module';
-
-import { LoggerModule } from 'nestjs-pino';
 import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
     CommonModule,
-    LoggerModule.forRoot({
-      pinoHttp: {
-        customProps: () => ({
-          context: 'HTTP',
-        }),
-        transport: {
-          target: 'pino-pretty',
-          options: {
-            singleLine: true,
-          },
-        },
-      },
-    }),
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
