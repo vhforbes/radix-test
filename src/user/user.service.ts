@@ -6,6 +6,7 @@ import { IsNull, Repository } from 'typeorm';
 import { hashPassword } from '@src/utils/hash-password';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { NotificationService } from '@src/notification/notification.service';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class UserService {
@@ -14,6 +15,7 @@ export class UserService {
     private userRepository: Repository<User>,
     private logger: Logger,
     private notificationService: NotificationService,
+    private readonly amqpConnection: AmqpConnection,
   ) {}
 
   async findOne(email: string): Promise<User | null> {
@@ -39,7 +41,10 @@ export class UserService {
 
     this.logger.log('Created user: ', { userToCreate });
 
-    this.notificationService.sendNotification();
+    this.amqpConnection.publish('user-exchange', 'user.created', {
+      email: user.email,
+      name: user.name,
+    });
 
     return userToCreate;
   }

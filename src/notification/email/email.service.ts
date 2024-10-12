@@ -15,7 +15,7 @@ export class EmailService {
     const content = {
       FromEmailAddress: 'victor@victorhugoforbes.com',
       Destination: {
-        ToAddresses: ['recipient@example.com'], // Replace with the actual recipient email
+        ToAddresses: ['vhforbes@gmail.com'], // Replace with the actual recipient email
         CcAddresses: [],
         BccAddresses: [],
       },
