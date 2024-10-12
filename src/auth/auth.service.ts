@@ -1,4 +1,9 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import User from '@src/user/user.entity';
@@ -16,7 +21,7 @@ export class AuthService {
     private logger: Logger,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
+  async validateUser(username: string, password: string): Promise<User | null> {
     const user = await this.usersService.findOne(username);
 
     try {
@@ -28,7 +33,7 @@ export class AuthService {
         return null;
       }
     } catch (error) {
-      console.error(error);
+      this.logger.error('Error comparing passwords', error.message);
     }
   }
 
