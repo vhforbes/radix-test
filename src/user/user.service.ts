@@ -1,12 +1,20 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import User from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 
 import { hashPassword } from '@src/utils/hash-password';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { NotificationService } from '@src/notification/notification.service';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { MessageBrokerConfig } from '@src/common/message-broker/message-broker.config';
+import { UserCreatedEvent } from '@src/common/message-broker/interfaces/user-created-event.interface';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
@@ -14,8 +22,9 @@ export class UserService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private logger: Logger,
-    private notificationService: NotificationService,
+    private jwtService: JwtService,
     private readonly amqpConnection: AmqpConnection,
+    private configService: ConfigService,
   ) {}
 
   async findOne(email: string): Promise<User | null> {
@@ -41,10 +50,26 @@ export class UserService {
 
     this.logger.log('Created user: ', { userToCreate });
 
-    this.amqpConnection.publish('user-exchange', 'user.created', {
+    const confirmationToken = await this.createConfirmEmailToken(user.email);
+
+    const userCreatedMessage: UserCreatedEvent = {
       email: user.email,
       name: user.name,
-    });
+      confirmationToken,
+    };
+
+    try {
+      await this.amqpConnection.publish(
+        MessageBrokerConfig.user.exchanges.userExchange,
+        MessageBrokerConfig.user.routingKeys.userCreated,
+        userCreatedMessage,
+      );
+    } catch (error) {
+      // There may be a need to retry if messages fail to enter the queue...
+      // For now ill just log
+
+      this.logger.error('Failed to send message to broker', error.message);
+    }
 
     return userToCreate;
   }
@@ -59,5 +84,39 @@ export class UserService {
     this.logger.log('Updated password of user ', userToUpdate);
 
     return updatedUser;
+  }
+
+  async createConfirmEmailToken(email: string) {
+    const token = await this.jwtService.signAsync(
+      { email },
+      {
+        secret: this.configService.get<string>('JWT_CREATION_SECRET'),
+        expiresIn: '30d',
+      },
+    );
+
+    return token;
+  }
+
+  async confirmEmail(token: string) {
+    const decoded = await this.jwtService.verifyAsync(token, {
+      secret: this.configService.get<string>('JWT_CREATION_SECRET'),
+    });
+
+    if (!decoded.email) {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+
+    const user = await this.findOne(decoded.email);
+
+    if (!user) {
+      throw new BadRequestException('User to confirm not found');
+    }
+
+    user.confirmed = true;
+
+    await this.userRepository.save(user);
+
+    return 'Email confirmed';
   }
 }

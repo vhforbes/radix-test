@@ -25,8 +25,6 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
           prefetchCount: 2,
         },
       },
-      // Why chatgpt pu this here if there is no controlller?
-      enableControllerDiscovery: true,
     }),
   ],
   providers: [NotificationService],

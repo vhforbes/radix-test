@@ -1,6 +1,8 @@
 import { SESv2 } from '@aws-sdk/client-sesv2';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectAws } from 'aws-sdk-v3-nest';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class EmailService {
@@ -9,29 +11,32 @@ export class EmailService {
     private readonly logger: Logger,
   ) {}
 
-  async sendEmail() {
-    this.logger.log('Sending email trough SES');
+  private async sendEmail(
+    to: string,
+    subject: string,
+    htmlBody: string,
+    textBody?: string,
+  ) {
+    this.logger.log(`Sending email to ${to}`);
 
-    const content = {
-      FromEmailAddress: 'victor@victorhugoforbes.com',
+    const emailContent = {
+      FromEmailAddress: 'hey@victorhugoforbes.com',
       Destination: {
-        ToAddresses: ['vhforbes@gmail.com'], // Replace with the actual recipient email
-        CcAddresses: [],
-        BccAddresses: [],
+        ToAddresses: [to],
       },
       Content: {
         Simple: {
           Subject: {
-            Data: 'Test Email Subject',
+            Data: subject,
             Charset: 'UTF-8',
           },
           Body: {
             Text: {
-              Data: 'This is a test email sent from AWS SES.',
+              Data: textBody || '',
               Charset: 'UTF-8',
             },
             Html: {
-              Data: '<h1>This is a test email sent from AWS SES.</h1>',
+              Data: htmlBody,
               Charset: 'UTF-8',
             },
           },
@@ -40,12 +45,44 @@ export class EmailService {
     };
 
     try {
-      await this.sesClient.sendEmail(content);
+      await this.sesClient.sendEmail(emailContent);
     } catch (error) {
-      this.logger.error('Could not send email ', {
-        error: error,
-        message: error.message,
-      });
+      this.logger.error('Failed to send email', { error: error.message });
     }
+  }
+
+  async sendUserCreationEmail(
+    to: string,
+    name: string,
+    confirmEmailToken: string,
+  ) {
+    const subject = 'Welcome to Our Platform!';
+    const htmlBody = this.getEmailTemplate('user-creation', {
+      name,
+      confirmEmailToken,
+    });
+    const textBody = `Hello ${name}, welcome to our platform!`;
+
+    await this.sendEmail(to, subject, htmlBody, textBody);
+  }
+
+  private getEmailTemplate(
+    templateName: string,
+    variables: Record<string, string>,
+  ) {
+    const templatePath = path.resolve(
+      __dirname,
+      `./templates/${templateName}.html`,
+    );
+
+    let template = fs.readFileSync(templatePath, 'utf8');
+
+    // * Chat GPT Magic *
+    Object.keys(variables).forEach((key) => {
+      const regex = new RegExp(`{{${key}}}`, 'g');
+      template = template.replace(regex, variables[key]);
+    });
+
+    return template;
   }
 }

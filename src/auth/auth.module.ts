@@ -22,6 +22,7 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
       }),
     }),
   ],
+
   providers: [
     AuthService,
     LocalStrategy,
@@ -31,5 +32,6 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
     Logger,
   ],
   controllers: [AuthController],
+  exports: [AuthService],
 })
 export class AuthModule {}

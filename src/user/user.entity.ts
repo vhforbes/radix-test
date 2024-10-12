@@ -23,6 +23,9 @@ class User {
   @Column('varchar')
   password: string;
 
+  @Column({ type: 'boolean', default: false })
+  confirmed: boolean;
+
   @OneToMany(() => Comunity, (comunity) => comunity.owner)
   comunities_owned: Comunity[];
 

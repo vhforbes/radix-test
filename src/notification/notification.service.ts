@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EmailService } from './email/email.service';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { MessageBrokerConfig } from '@src/common/message-broker/message-broker.config';
+import { UserCreatedEvent } from '@src/common/message-broker/interfaces/user-created-event.interface';
 
 @Injectable()
 export class NotificationService {
@@ -10,19 +12,19 @@ export class NotificationService {
   ) {}
 
   @RabbitSubscribe({
-    exchange: 'user-exchange',
-    routingKey: 'user.created',
-    queue: 'user-email-queue',
+    exchange: MessageBrokerConfig.user.exchanges.userExchange,
+    routingKey: MessageBrokerConfig.user.routingKeys.userCreated,
+    queue: MessageBrokerConfig.user.queues.userEmailQueue,
   })
-  public async handleUserCreation(msg: { email: string; name: string }) {
+  public async handleUserCreation(msg: UserCreatedEvent) {
     this.logger.log(
       `Received message for user creation: ${JSON.stringify(msg)}`,
     );
 
-    this.sendNotification();
-  }
-
-  async sendNotification() {
-    await this.emailService.sendEmail();
+    await this.emailService.sendUserCreationEmail(
+      msg.email,
+      msg.name,
+      msg.confirmationToken,
+    );
   }
 }
