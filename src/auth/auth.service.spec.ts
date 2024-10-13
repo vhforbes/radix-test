@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { Logger } from '@nestjs/common';
 import { userMock } from '@test/mocks/user/user.mock';
+import { amqpConnectionMock } from '@test/mocks/rabbitmq/amqp-connection.mock';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -32,6 +33,7 @@ describe('AuthService', () => {
         jwtServiceMock,
         ConfigService,
         Logger,
+        amqpConnectionMock,
       ],
     }).compile();
 

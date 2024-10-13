@@ -1,24 +1,37 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommunityService } from './community.service';
-import { communityRepositoryMock } from '@test/mocks/community/community.repository.mock';
 import { userServiceMock } from '@test/mocks/user/user.service.mock';
 import { userMock } from '@test/mocks/user/user.mock';
+import { UserReq } from '@src/auth/interfaces';
+import { membershipServiceMock } from '@test/mocks/membership/membership.service.mock';
+import { repositoryMockFactory } from '@test/mocks/repositoryMockFactory';
+import Community from './community.entity';
+import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('CommunityService', () => {
   let service: CommunityService;
+  let communityRepositoryMock;
 
-  const userReqMock = {
+  const userReqMock: UserReq = {
     user_id: '123',
     email: 'test@test.com',
     name: 'Name',
+    role: 'role',
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CommunityService, communityRepositoryMock, userServiceMock],
+      providers: [
+        CommunityService,
+        // This is not working when trying to mock value on the fn's
+        repositoryMockFactory(Community),
+        userServiceMock,
+        membershipServiceMock,
+      ],
     }).compile();
 
     service = module.get<CommunityService>(CommunityService);
+    communityRepositoryMock = module.get(getRepositoryToken(Community));
   });
 
   it('should be defined', () => {
