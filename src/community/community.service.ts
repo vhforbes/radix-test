@@ -12,12 +12,15 @@ import Community from './community.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommunityDto } from './dto/community.dto';
 import { CommunityStatus } from './community-status.enum.dto';
+import { MembershipService } from '@src/membership/membership.service';
+import { MembershipRole } from '@src/membership/membership-roles.enum';
 
 @Injectable()
 export class CommunityService {
   constructor(
     @InjectRepository(Community)
     private communityRepository: Repository<Community>,
+    private membershipService: MembershipService,
     private userService: UserService,
   ) {}
 
@@ -41,6 +44,12 @@ export class CommunityService {
 
     await this.communityRepository.save(community);
 
+    await this.membershipService.assignMemberRole(
+      community,
+      user,
+      MembershipRole.OWNER,
+    );
+
     delete community.owner;
 
     return community;
@@ -59,7 +68,7 @@ export class CommunityService {
     });
 
     if (!community) {
-      throw new Error('Community not found');
+      return null;
     }
 
     const communityDto: CommunityDto = {
@@ -79,12 +88,7 @@ export class CommunityService {
       throw new BadRequestException('Community not found');
     }
 
-    const updatedCommunity = {
-      ...communityToUpdate,
-      ...updateCommunityDto,
-    };
-
-    await this.communityRepository.save(updatedCommunity);
+    await this.communityRepository.update(id, updateCommunityDto);
 
     return `Community updated`;
   }
@@ -96,9 +100,9 @@ export class CommunityService {
       throw new BadRequestException('Community not found');
     }
 
-    communityToRemove.status = CommunityStatus.INACTIVE;
-
-    await this.communityRepository.save(communityToRemove);
+    await this.communityRepository.update(id, {
+      status: CommunityStatus.INACTIVE,
+    });
 
     return `Community deleted`;
   }

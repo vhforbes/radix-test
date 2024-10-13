@@ -67,7 +67,7 @@ export class EmailService {
   }
 
   async sendUserRecoveryEmail(to: string, name: string, recoveryToken: string) {
-    const subject = 'Welcome to Our Platform!';
+    const subject = 'Recover your account!';
     const htmlBody = this.getEmailTemplate('user-recovery', {
       name,
       recoveryToken,

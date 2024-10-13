@@ -14,10 +14,12 @@ import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
 import { JwtAuthGuard } from '@src/auth/guards/jwt-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
-import { Roles } from '@src/auth/roles.decorator';
+import { Roles } from '@src/common/roles.decorator';
 import { UserRole } from '@src/user/user-roles.enum';
 import { RolesGuard } from '@src/auth/guards/roles.guard';
 import { Reflector } from '@nestjs/core';
+import { MembershipRoleGuard } from '@src/membership/guards/membership.guard';
+import { MembershipRole } from '@src/membership/membership-roles.enum';
 
 @ApiTags('community')
 @Controller('community')
@@ -27,7 +29,6 @@ export class CommunityController {
     private readonly reflector: Reflector, // Instantiating for RolesGuard
   ) {}
 
-  // TODO: Guarantee only authorized user or superAdmin can create
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles([UserRole.ADMIN])
   @Post()
@@ -45,7 +46,8 @@ export class CommunityController {
     return this.communityService.findOne(id);
   }
 
-  // TODO: Guarantee the owner or admin or superAdmin
+  @UseGuards(JwtAuthGuard, MembershipRoleGuard)
+  @Roles([MembershipRole.OWNER, MembershipRole.ADMIN])
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -54,7 +56,8 @@ export class CommunityController {
     return this.communityService.update(id, updateCommunityDto);
   }
 
-  // TODO: Guarantee the owner or admin or superAdmin
+  @UseGuards(JwtAuthGuard, MembershipRoleGuard)
+  @Roles([MembershipRole.OWNER])
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.communityService.remove(id);
