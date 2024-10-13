@@ -4,11 +4,14 @@ export const MessageBrokerConfig = {
       userExchange: 'user-exchange',
     },
     queues: {
-      userEmailQueue: 'user-email-queue',
+      createUserEmailQueue: 'create-email-user-queue',
+      recoverUserEmailQueue: 'recover-user-email-queue',
+
       userAnalyticsQueue: 'user-analytics-queue',
     },
     routingKeys: {
       userCreated: 'user.created',
+      userRecover: 'user.recover',
     },
   },
 };

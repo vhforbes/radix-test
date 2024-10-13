@@ -6,6 +6,9 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { ResetPassDto } from './dtos/reset-password.dto';
 import { hashPassword } from '@src/utils/hash-password';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { MessageBrokerConfig } from '@src/common/message-broker/message-broker.config';
+import { UserRecoverEvent } from '@src/common/message-broker/interfaces/user-recover-event.interface';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +17,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private logger: Logger,
+    private readonly amqpConnection: AmqpConnection,
   ) {}
 
   async validateUser(username: string, password: string): Promise<User | null> {
@@ -36,7 +40,12 @@ export class AuthService {
     access_token: string;
     refresh_token: string;
   }> {
-    const payload = { email: user.email, name: user.name, sub: user.id };
+    const payload = {
+      email: user.email,
+      name: user.name,
+      sub: user.id,
+      role: user.role,
+    };
 
     return {
       access_token: await this.jwtService.signAsync(payload, {
@@ -59,7 +68,7 @@ export class AuthService {
       return;
     }
 
-    const token = await this.jwtService.signAsync(
+    const recoveryToken = await this.jwtService.signAsync(
       { email },
       {
         secret: this.configService.get<string>('JWT_RECOVER_SECRET'),
@@ -67,8 +76,23 @@ export class AuthService {
       },
     );
 
-    // TODO: Call here messaging service where it sends the token to the user
-    return token;
+    try {
+      const recoverUserMessage: UserRecoverEvent = {
+        email,
+        name: user.name,
+        recoveryToken,
+      };
+
+      await this.amqpConnection.publish(
+        MessageBrokerConfig.user.exchanges.userExchange,
+        MessageBrokerConfig.user.routingKeys.userRecover,
+        recoverUserMessage,
+      );
+
+      return 'Recovery email sent!';
+    } catch (error) {
+      this.logger.error('Failed to send recovery email: ', error.message);
+    }
   }
 
   async resetPassword({ newPassword, token }: ResetPassDto): Promise<any> {
@@ -76,8 +100,6 @@ export class AuthService {
       const decoded = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>('JWT_RECOVER_SECRET'),
       });
-
-      console.log(decoded);
 
       const hashedPass = await hashPassword(newPassword);
 

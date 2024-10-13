@@ -66,6 +66,17 @@ export class EmailService {
     await this.sendEmail(to, subject, htmlBody, textBody);
   }
 
+  async sendUserRecoveryEmail(to: string, name: string, recoveryToken: string) {
+    const subject = 'Welcome to Our Platform!';
+    const htmlBody = this.getEmailTemplate('user-recovery', {
+      name,
+      recoveryToken,
+    });
+    const textBody = `Hello ${name}, welcome to our platform!`;
+
+    await this.sendEmail(to, subject, htmlBody, textBody);
+  }
+
   private getEmailTemplate(
     templateName: string,
     variables: Record<string, string>,
