@@ -5,18 +5,10 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { Logger } from '@nestjs/common';
+import { userMock } from '@test/mocks/user/user.mock';
 
 describe('AuthService', () => {
   let service: AuthService;
-
-  const userMock = {
-    id: 'uuid',
-    name: 'User Name',
-    email: 'vhforbes@gmail.com',
-    password: '170496',
-    created_at: new Date(),
-    updated_at: new Date(),
-  };
 
   const userServiceMock = {
     provide: UserService,
