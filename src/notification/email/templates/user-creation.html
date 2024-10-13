@@ -3,6 +3,12 @@
   <body>
     <h1>Welcome, {{name}}!</h1>
     <p>Thank you for joining our platform.</p>
-    <p>Please confirm you email using this token {{confirmEmailToken}}</p>
+    <p>
+      Please confirm you email using this token
+      <a href="http://mysite.com/confirm/{{confirmEmailToken}}"
+        >CONFIRM EMAIL</a
+      >
+      Corifmation token: {{confirmEmailToken}}
+    </p>
   </body>
 </html>

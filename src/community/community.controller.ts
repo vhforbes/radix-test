@@ -20,6 +20,7 @@ import { ApiTags } from '@nestjs/swagger';
 export class CommunityController {
   constructor(private readonly communityService: CommunityService) {}
 
+  // TODO: Guarantee only authorized user or superAdmin can create
   @Post()
   @UseGuards(JwtAuthGuard)
   create(@Request() req, @Body() createCommunityDto: CreateCommunityDto) {
@@ -36,21 +37,18 @@ export class CommunityController {
     return this.communityService.findOne(id);
   }
 
+  // TODO: Guarantee the owner or admin or superAdmin
   @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updateCommunityDto: UpdateCommunityDto,
   ) {
-    return this.communityService.update(+id, updateCommunityDto);
+    return this.communityService.update(id, updateCommunityDto);
   }
 
+  // TODO: Guarantee the owner or admin or superAdmin
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.communityService.remove(+id);
-  }
-
-  @Get(':id')
-  joinCommunity(@Param('id') id: string) {
-    return this.communityService.findOne(id);
+    return this.communityService.remove(id);
   }
 }

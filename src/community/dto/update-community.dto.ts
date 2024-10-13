@@ -1,4 +1,12 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateCommunityDto } from './create-community.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
-export class UpdateCommunityDto extends PartialType(CreateCommunityDto) {}
+// Only what the owner can change!
+export class UpdateCommunityDto {
+  @ApiProperty()
+  @IsString()
+  name?: string;
+
+  @ApiProperty({ nullable: true })
+  description?: string;
+}

@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
 import { UserReq } from '@src/auth/interfaces';
@@ -7,6 +11,7 @@ import { IsNull, Repository } from 'typeorm';
 import Community from './community.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommunityDto } from './dto/community.dto';
+import { CommunityStatus } from './community-status.enum.dto';
 
 @Injectable()
 export class CommunityService {
@@ -67,11 +72,34 @@ export class CommunityService {
     return communityDto;
   }
 
-  update(id: number, updateCommunityDto: UpdateCommunityDto) {
-    return `This action updates a #${id} community ${updateCommunityDto}`;
+  async update(id: string, updateCommunityDto: UpdateCommunityDto) {
+    const communityToUpdate = await this.findOne(id);
+
+    if (!communityToUpdate) {
+      throw new BadRequestException('Community not found');
+    }
+
+    const updatedCommunity = {
+      ...communityToUpdate,
+      ...updateCommunityDto,
+    };
+
+    await this.communityRepository.save(updatedCommunity);
+
+    return `Community updated`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} community`;
+  async remove(id: string) {
+    const communityToRemove = await this.findOne(id);
+
+    if (!communityToRemove) {
+      throw new BadRequestException('Community not found');
+    }
+
+    communityToRemove.status = CommunityStatus.INACTIVE;
+
+    await this.communityRepository.save(communityToRemove);
+
+    return `Community deleted`;
   }
 }
