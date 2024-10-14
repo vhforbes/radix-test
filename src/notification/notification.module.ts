@@ -9,7 +9,7 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
     RabbitMQModule.forRoot(RabbitMQModule, {
       exchanges: [
         {
-          name: 'user-exchange',
+          name: 'user-exchange-test',
           type: 'topic',
         },
       ],

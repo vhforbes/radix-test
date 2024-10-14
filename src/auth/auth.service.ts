@@ -85,7 +85,7 @@ export class AuthService {
 
       await this.amqpConnection.publish(
         MessageBrokerConfig.user.exchanges.userExchange,
-        MessageBrokerConfig.user.routingKeys.userRecover,
+        'user.recover',
         recoverUserMessage,
       );
 

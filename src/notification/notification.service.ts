@@ -15,11 +15,10 @@ export class NotificationService {
   @RabbitSubscribe({
     exchange: MessageBrokerConfig.user.exchanges.userExchange,
     routingKey: MessageBrokerConfig.user.routingKeys.userCreated,
-    queue: MessageBrokerConfig.user.queues.createUserEmailQueue,
   })
   public async handleUserCreation(msg: UserCreatedEvent, amqpMsg: any) {
     this.logger.log(
-      `Received message: ${JSON.stringify(msg)}, Routing Key: ${amqpMsg.fields.routingKey}`,
+      `Received handleUserCreation message: ${JSON.stringify(msg)}, Routing Key: ${amqpMsg.fields.routingKey}`,
     );
 
     await this.emailService.sendUserCreationEmail(
@@ -32,11 +31,10 @@ export class NotificationService {
   @RabbitSubscribe({
     exchange: MessageBrokerConfig.user.exchanges.userExchange,
     routingKey: MessageBrokerConfig.user.routingKeys.userRecover,
-    queue: MessageBrokerConfig.user.queues.recoverUserEmailQueue,
   })
-  public async handleUserRecovery(msg: UserRecoverEvent) {
+  public async handleUserRecovery(msg: UserRecoverEvent, amqpMsg: any) {
     this.logger.log(
-      `Received message for user recovery: ${JSON.stringify(msg)}`,
+      `Received handleUserRecovery message: ${JSON.stringify(msg)}, Routing Key: ${amqpMsg.fields.routingKey}`,
     );
 
     await this.emailService.sendUserRecoveryEmail(
