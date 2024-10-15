@@ -19,7 +19,7 @@ import { UserRole } from '@src/user/user-roles.enum';
 import { RolesGuard } from '@src/auth/guards/roles.guard';
 import { Reflector } from '@nestjs/core';
 import { MembershipRoleGuard } from '@src/membership/guards/membership.guard';
-import { MembershipRole } from '@src/membership/membership-roles.enum';
+import { MembershipRole } from '@src/membership/enums/membership-roles.enum';
 
 @ApiTags('community')
 @Controller('community')

@@ -10,7 +10,10 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 
 describe('CommunityService', () => {
   let service: CommunityService;
-  let communityRepositoryMock;
+  const communityRepositoryMock = {
+    provide: getRepositoryToken(Community),
+    useValue: repositoryMockFactory(),
+  };
 
   const userReqMock: UserReq = {
     user_id: '123',
@@ -23,15 +26,13 @@ describe('CommunityService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CommunityService,
-        // This is not working when trying to mock value on the fn's
-        repositoryMockFactory(Community),
+        communityRepositoryMock,
         userServiceMock,
         membershipServiceMock,
       ],
     }).compile();
 
     service = module.get<CommunityService>(CommunityService);
-    communityRepositoryMock = module.get(getRepositoryToken(Community));
   });
 
   it('should be defined', () => {

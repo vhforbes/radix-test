@@ -2,9 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { In, Repository } from 'typeorm';
 import { Membership } from './membership.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MembershipRole } from './membership-roles.enum';
-import Community from '@src/community/community.entity';
-import User from '@src/user/user.entity';
+import { MembershipRole } from './enums/membership-roles.enum';
 
 @Injectable()
 export class MembershipService {
@@ -13,15 +11,15 @@ export class MembershipService {
     private membershipRepository: Repository<Membership>,
   ) {}
 
-  async assignMemberRole(
-    community: Community,
-    user: User,
+  async assignMembershipRole(
+    userId: string,
+    communityId: string,
     role: MembershipRole,
   ) {
     const newMembership = this.membershipRepository.create({
-      community,
+      user: { id: userId },
+      community: { id: communityId },
       role,
-      user,
     });
 
     await this.membershipRepository.save(newMembership);
@@ -29,10 +27,7 @@ export class MembershipService {
     return newMembership;
   }
 
-  async hasMembershipRole(communityId, email, roles: string[]) {
-    // Check if it has any of the needed roles
-    // ['Admin', 'User' ...]
-
+  async hasMembershipRole(communityId: string, email: string, roles: string[]) {
     const membership = await this.membershipRepository.findOne({
       where: {
         role: In(roles),

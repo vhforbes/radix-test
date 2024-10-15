@@ -1,10 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsUUID } from 'class-validator';
+import { AllowedMembershipRoles } from '../enums/allowed-membership-roles.enum';
+import { MembershipRole } from '../enums/membership-roles.enum';
 
-export class JoinComunityDto {
+export class AssignMembershipDto {
   @ApiProperty()
-  @IsString()
+  @IsUUID()
   communityId: string;
 
-  // Some payment stuff here
+  @ApiProperty()
+  @IsEmail()
+  userEmail: string;
+
+  @ApiProperty({ enum: AllowedMembershipRoles })
+  @IsEnum(AllowedMembershipRoles)
+  role: AllowedMembershipRoles | MembershipRole;
 }

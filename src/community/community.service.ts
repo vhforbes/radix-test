@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
@@ -13,7 +14,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CommunityDto } from './dto/community.dto';
 import { CommunityStatus } from './community-status.enum.dto';
 import { MembershipService } from '@src/membership/membership.service';
-import { MembershipRole } from '@src/membership/membership-roles.enum';
+import { MembershipRole } from '@src/membership/enums/membership-roles.enum';
 
 @Injectable()
 export class CommunityService {
@@ -25,8 +26,6 @@ export class CommunityService {
   ) {}
 
   async create(userReq: UserReq, createCommunityDto: CreateCommunityDto) {
-    const user = await this.userService.findOne(userReq.email);
-
     const nameAlreadyExists = await this.communityRepository.findOneBy({
       name: createCommunityDto.name ?? IsNull(),
     });
@@ -37,14 +36,14 @@ export class CommunityService {
 
     const community = this.communityRepository.create({
       name: createCommunityDto.name,
-      owner: user,
+      owner: { id: userReq.user_id },
     });
 
     await this.communityRepository.save(community);
 
-    await this.membershipService.assignMemberRole(
-      community,
-      user,
+    await this.membershipService.assignMembershipRole(
+      userReq.user_id,
+      community.id,
       MembershipRole.OWNER,
     );
 
@@ -66,7 +65,7 @@ export class CommunityService {
     });
 
     if (!community) {
-      return null;
+      throw new NotFoundException('Community not found');
     }
 
     const communityDto: CommunityDto = {

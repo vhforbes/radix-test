@@ -9,7 +9,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { MembershipRole } from './membership-roles.enum';
+import { MembershipRole } from './enums/membership-roles.enum';
 import { Subscription } from '@src/subscription/subscription.entity';
 
 @Entity()
@@ -25,8 +25,10 @@ export class Membership {
   @JoinColumn({ name: 'community_id' })
   community: Community;
 
-  @OneToMany(() => Subscription, (subscription) => subscription.membership)
-  subscriptions: Subscription[];
+  @OneToMany(() => Subscription, (subscription) => subscription.membership, {
+    nullable: true,
+  })
+  subscriptions?: Subscription[];
 
   @Column({
     type: 'enum',
