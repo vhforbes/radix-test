@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import Community from '@src/community/community.entity';
 import { Membership } from '@src/membership/membership.entity';
 import { Notification } from '@src/notification/notification.entity';
+import { SubscriptionPlan } from '@src/subscription/subscription-plan.entity';
+import { Subscription } from '@src/subscription/subscription.entity';
 import User from 'src/user/user.entity';
 
 @Module({
@@ -19,7 +21,14 @@ import User from 'src/user/user.entity';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
         synchronize: true, // Set to false in production
-        entities: [User, Community, Membership, Notification],
+        entities: [
+          User,
+          Community,
+          Membership,
+          Notification,
+          Subscription,
+          SubscriptionPlan,
+        ],
       }),
     }),
   ],

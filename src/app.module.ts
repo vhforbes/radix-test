@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { CommunityModule } from './community/community.module';
 import { MembershipModule } from './membership/membership.module';
 import { NotificationModule } from './notification/notification.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { NotificationModule } from './notification/notification.module';
     CommunityModule,
     MembershipModule,
     NotificationModule,
+    SubscriptionModule,
   ],
   controllers: [],
   providers: [],

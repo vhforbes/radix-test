@@ -26,12 +26,6 @@ class Community {
   })
   status: CommunityStatus;
 
-  @Column('decimal', { nullable: false, precision: 10, scale: 2 })
-  monthly_price: number;
-
-  @Column('decimal', { nullable: false, precision: 10, scale: 2 })
-  yearly_price: number;
-
   @Column({ default: 'BRL', nullable: false })
   currency: string;
 

@@ -15,12 +15,6 @@ export class CommunityDto {
   status: CommunityStatus;
 
   @ApiProperty()
-  monthly_price: number;
-
-  @ApiProperty()
-  yearly_price: number;
-
-  @ApiProperty()
   currency: string;
 
   @ApiProperty()

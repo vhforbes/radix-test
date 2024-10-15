@@ -38,8 +38,6 @@ export class CommunityService {
     const community = this.communityRepository.create({
       name: createCommunityDto.name,
       owner: user,
-      monthly_price: createCommunityDto.monthly_price,
-      yearly_price: createCommunityDto.yearly_price,
     });
 
     await this.communityRepository.save(community);
