@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { SubscriptionPlan } from './subscription-plan.entity';
-import { SubscriptionStatus } from './subscription-status.enum';
+import { SubscriptionStatus } from './enums/subscription-status.enum';
 
 @Entity('subscription')
 export class Subscription {

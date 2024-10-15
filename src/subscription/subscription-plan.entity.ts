@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Subscription } from './subscription.entity';
+import { SubscriptionPlanStatus } from './enums/subscription-plan-status.enum';
 
 @Entity()
 export class SubscriptionPlan {
@@ -24,6 +25,9 @@ export class SubscriptionPlan {
 
   @OneToMany(() => Subscription, (subscription) => subscription.plan)
   subscriptions: Subscription[];
+
+  @Column({ type: 'enum', enum: SubscriptionPlanStatus })
+  status: SubscriptionPlanStatus;
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
