@@ -1,13 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import Trade from '../entities/trade.entity';
 import { CreateTradeDto } from '../dtos/create.dto';
 import { UserService } from '@src/user/user.service';
 import { UserReq } from '@src/auth/interfaces';
-import { TradeStatus } from '../trade.enum';
+import { TradeDirection, TradeStatus } from '../trade.enum';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -23,91 +19,117 @@ export class TradeService {
     createTradeDto: CreateTradeDto,
     userReq: UserReq,
   ): Promise<Trade> {
-    try {
-      const createdTrade: Trade = this.tradeRepository.create(createTradeDto);
-      const user = await this.userService.findOne(userReq.email);
+    const newTrade: Trade = this.tradeRepository.create(createTradeDto);
+    const user = await this.userService.findOne(userReq.email);
+    delete user.password;
 
-      createdTrade.trader = user;
+    if (!this.validEntryOrders(newTrade))
+      throw new BadRequestException('Invalid entry orders');
 
-      createdTrade.status = TradeStatus.Awaiting;
+    newTrade.trader = user;
+    newTrade.status = TradeStatus.Awaiting;
 
-      //   this.utils.validateEntryOrders(createdTrade);
-      //   this.utils.validateTakeProfitOrders(createdTrade);
+    //   this.utils.validateEntryOrders(createdTrade);
+    //   this.utils.validateTakeProfitOrders(createdTrade);
 
-      //   createdTrade.expectedMedianPrice =
-      //     this.utils.calculateExpectedMedianPrice(createdTrade);
+    //   createdTrade.expectedMedianPrice =
+    //     this.utils.calculateExpectedMedianPrice(createdTrade);
 
-      //   createdTrade.expectedMedianTakeProfitPrice =
-      //     this.utils.calculateMedianTakeProfit(
-      //       createdTrade.effectiveTakeProfitPrice,
-      //       420,
-      //       69,
-      //     );
+    //   createdTrade.expectedMedianTakeProfitPrice =
+    //     this.utils.calculateMedianTakeProfit(
+    //       createdTrade.effectiveTakeProfitPrice,
+    //       420,
+    //       69,
+    //     );
 
-      //   if (
-      //     createdTrade.direction === TradeDirection.Long &&
-      //     createdTrade.expectedMedianTakeProfitPrice <
-      //       createdTrade.expectedMedianPrice
-      //   ) {
-      //     throw new BadRequestException(
-      //       'Operaçao de LONG. Seu preço médio precisa estar abaixo do take profit',
-      //     );
-      //   }
+    //   if (
+    //     createdTrade.direction === TradeDirection.Long &&
+    //     createdTrade.expectedMedianTakeProfitPrice <
+    //       createdTrade.expectedMedianPrice
+    //   ) {
+    //     throw new BadRequestException(
+    //       'Operaçao de LONG. Seu preço médio precisa estar abaixo do take profit',
+    //     );
+    //   }
 
-      //   if (
-      //     createdTrade.direction === TradeDirection.Short &&
-      //     createdTrade.expectedMedianTakeProfitPrice >
-      //       createdTrade.expectedMedianPrice
-      //   ) {
-      //     throw new BadRequestException(
-      //       'Operaçao de SHORT. Seu preço médio precisa estar acima do take profit',
-      //     );
-      //   }
+    //   if (
+    //     createdTrade.direction === TradeDirection.Short &&
+    //     createdTrade.expectedMedianTakeProfitPrice >
+    //       createdTrade.expectedMedianPrice
+    //   ) {
+    //     throw new BadRequestException(
+    //       'Operaçao de SHORT. Seu preço médio precisa estar acima do take profit',
+    //     );
+    //   }
 
-      //   if (
-      //     createdTrade.direction === TradeDirection.Long &&
-      //     createdTrade.expectedMedianPrice <=
-      //       createdTrade.stopPrice
-      //   ) {
-      //     throw new BadRequestException(
-      //       'Operaçao de LONG. Seu STOP precisa estar abaixo do seu preço médio',
-      //     );
-      //   }
+    //   if (
+    //     createdTrade.direction === TradeDirection.Long &&
+    //     createdTrade.expectedMedianPrice <=
+    //       createdTrade.stopPrice
+    //   ) {
+    //     throw new BadRequestException(
+    //       'Operaçao de LONG. Seu STOP precisa estar abaixo do seu preço médio',
+    //     );
+    //   }
 
-      //   if (
-      //     createdTrade.direction === TradeDirection.Short &&
-      //     createdTrade.expectedMedianPrice >=
-      //       createdTrade.stopPrice
-      //   ) {
-      //     throw new BadRequestException(
-      //       'Operaçao de LONG. Seu stop precisa estar acima do seu preço médio',
-      //     );
-      //   }
+    //   if (
+    //     createdTrade.direction === TradeDirection.Short &&
+    //     createdTrade.expectedMedianPrice >=
+    //       createdTrade.stopPrice
+    //   ) {
+    //     throw new BadRequestException(
+    //       'Operaçao de LONG. Seu stop precisa estar acima do seu preço médio',
+    //     );
+    //   }
 
-      //   const stopDistance = this.utils.calculateStopDistance(
-      //     createdTrade,
-      //   );
+    //   const stopDistance = this.utils.calculateStopDistance(
+    //     createdTrade,
+    //   );
 
-      //   createdTrade.stopDistance = stopDistance;
+    //   createdTrade.stopDistance = stopDistance;
 
-      const result = await this.tradeRepository.save(createdTrade);
+    await this.tradeRepository.save(newTrade);
 
-      // ---- TODO ----
-      //
-      // Start a CRON checker to check prices
-      //
-      // ---- TODO ----
+    // ---- TODO ----
+    //
+    // Start a CRON checker to check prices
+    //
+    // ---- TODO ----
 
-      delete result.trader.password;
+    return newTrade;
+  }
 
-      return result;
-    } catch (error) {
-      // Logger error here
-      console.log(error);
-
-      throw new InternalServerErrorException(
-        'Um erro desconhecido ocorreu ao criar a operação',
-      );
+  validEntryOrders(trade: Trade) {
+    if (trade.direction === TradeDirection.Long) {
+      if (this.isAscending(trade.entry_orders)) {
+        return true;
+      }
     }
+
+    if (trade.direction === TradeDirection.Short) {
+      if (this.isDescending(trade.entry_orders)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  isAscending(array: number[]) {
+    for (let i = 0; i < array.length - 1; i++) {
+      if (array[i] > array[i + 1]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  isDescending(array: number[]) {
+    for (let i = 0; i < array.length - 1; i++) {
+      if (array[i] < array[i + 1]) {
+        return false;
+      }
+    }
+    return true;
   }
 }
