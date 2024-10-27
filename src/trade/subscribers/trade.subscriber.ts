@@ -1,17 +1,28 @@
 import {
+  DataSource,
   EntitySubscriberInterface,
   EventSubscriber,
   InsertEvent,
 } from 'typeorm';
 import Trade from '../entities/trade.entity';
+import { TradeHistoryService } from '../services/trade-history.service';
 
 @EventSubscriber()
 export class TradeSubscriber implements EntitySubscriberInterface<Trade> {
+  constructor(
+    dataSource: DataSource,
+    private tradeHistoryService: TradeHistoryService,
+  ) {
+    dataSource.subscribers.push(this);
+  }
+
   listenTo() {
     return Trade;
   }
 
-  beforeInsert(event: InsertEvent<Trade>): Promise<any> | void {
-    console.log(event);
+  async afterInsert(event: InsertEvent<Trade>) {
+    this.tradeHistoryService.create(event.entity);
+
+    console.log(`BEFORE USER INSERTED: `, event.entity);
   }
 }

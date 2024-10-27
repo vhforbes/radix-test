@@ -3,11 +3,11 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import Trade from './entities/trade.entity';
-import { CreateTradeOperationDto } from './dtos/create.dto';
+import Trade from '../entities/trade.entity';
+import { CreateTradeDto } from '../dtos/create.dto';
 import { UserService } from '@src/user/user.service';
 import { UserReq } from '@src/auth/interfaces';
-import { TradeOperationStatus } from './trade.enum';
+import { TradeStatus } from '../trade.enum';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -20,35 +20,34 @@ export class TradeService {
   ) {}
 
   async create(
-    createTradeOperationDto: CreateTradeOperationDto,
+    createTradeDto: CreateTradeDto,
     userReq: UserReq,
   ): Promise<Trade> {
     try {
-      const createdTradeOperation: Trade = this.tradeRepository.create(
-        createTradeOperationDto,
-      );
+      const createdTrade: Trade = this.tradeRepository.create(createTradeDto);
+      const user = await this.userService.findOne(userReq.email);
 
-      createdTradeOperation.trader.id = userReq.user_id;
+      createdTrade.trader = user;
 
-      createdTradeOperation.status = TradeOperationStatus.Awaiting;
+      createdTrade.status = TradeStatus.Awaiting;
 
-      //   this.utils.validateEntryOrders(createdTradeOperation);
-      //   this.utils.validateTakeProfitOrders(createdTradeOperation);
+      //   this.utils.validateEntryOrders(createdTrade);
+      //   this.utils.validateTakeProfitOrders(createdTrade);
 
-      //   createdTradeOperation.expectedMedianPrice =
-      //     this.utils.calculateExpectedMedianPrice(createdTradeOperation);
+      //   createdTrade.expectedMedianPrice =
+      //     this.utils.calculateExpectedMedianPrice(createdTrade);
 
-      //   createdTradeOperation.expectedMedianTakeProfitPrice =
+      //   createdTrade.expectedMedianTakeProfitPrice =
       //     this.utils.calculateMedianTakeProfit(
-      //       createdTradeOperation.effectiveTakeProfitPrice,
+      //       createdTrade.effectiveTakeProfitPrice,
       //       420,
       //       69,
       //     );
 
       //   if (
-      //     createdTradeOperation.direction === TradeOperationDirection.Long &&
-      //     createdTradeOperation.expectedMedianTakeProfitPrice <
-      //       createdTradeOperation.expectedMedianPrice
+      //     createdTrade.direction === TradeDirection.Long &&
+      //     createdTrade.expectedMedianTakeProfitPrice <
+      //       createdTrade.expectedMedianPrice
       //   ) {
       //     throw new BadRequestException(
       //       'Operaçao de LONG. Seu preço médio precisa estar abaixo do take profit',
@@ -56,9 +55,9 @@ export class TradeService {
       //   }
 
       //   if (
-      //     createdTradeOperation.direction === TradeOperationDirection.Short &&
-      //     createdTradeOperation.expectedMedianTakeProfitPrice >
-      //       createdTradeOperation.expectedMedianPrice
+      //     createdTrade.direction === TradeDirection.Short &&
+      //     createdTrade.expectedMedianTakeProfitPrice >
+      //       createdTrade.expectedMedianPrice
       //   ) {
       //     throw new BadRequestException(
       //       'Operaçao de SHORT. Seu preço médio precisa estar acima do take profit',
@@ -66,9 +65,9 @@ export class TradeService {
       //   }
 
       //   if (
-      //     createdTradeOperation.direction === TradeOperationDirection.Long &&
-      //     createdTradeOperation.expectedMedianPrice <=
-      //       createdTradeOperation.stopPrice
+      //     createdTrade.direction === TradeDirection.Long &&
+      //     createdTrade.expectedMedianPrice <=
+      //       createdTrade.stopPrice
       //   ) {
       //     throw new BadRequestException(
       //       'Operaçao de LONG. Seu STOP precisa estar abaixo do seu preço médio',
@@ -76,9 +75,9 @@ export class TradeService {
       //   }
 
       //   if (
-      //     createdTradeOperation.direction === TradeOperationDirection.Short &&
-      //     createdTradeOperation.expectedMedianPrice >=
-      //       createdTradeOperation.stopPrice
+      //     createdTrade.direction === TradeDirection.Short &&
+      //     createdTrade.expectedMedianPrice >=
+      //       createdTrade.stopPrice
       //   ) {
       //     throw new BadRequestException(
       //       'Operaçao de LONG. Seu stop precisa estar acima do seu preço médio',
@@ -86,12 +85,12 @@ export class TradeService {
       //   }
 
       //   const stopDistance = this.utils.calculateStopDistance(
-      //     createdTradeOperation,
+      //     createdTrade,
       //   );
 
-      //   createdTradeOperation.stopDistance = stopDistance;
+      //   createdTrade.stopDistance = stopDistance;
 
-      const result = await this.tradeRepository.save(createdTradeOperation);
+      const result = await this.tradeRepository.save(createdTrade);
 
       // ---- TODO ----
       //
@@ -99,7 +98,7 @@ export class TradeService {
       //
       // ---- TODO ----
 
-      //   delete result.user;
+      delete result.trader.password;
 
       return result;
     } catch (error) {

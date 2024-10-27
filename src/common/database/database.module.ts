@@ -6,6 +6,7 @@ import { Membership } from '@src/membership/membership.entity';
 import { Notification } from '@src/notification/notification.entity';
 import { SubscriptionPlan } from '@src/subscription/subscription-plan.entity';
 import { Subscription } from '@src/subscription/subscription.entity';
+import TradeHistory from '@src/trade/entities/tade-history.entity';
 import Trade from '@src/trade/entities/trade.entity';
 import User from 'src/user/user.entity';
 
@@ -30,6 +31,7 @@ import User from 'src/user/user.entity';
           Subscription,
           SubscriptionPlan,
           Trade,
+          TradeHistory,
         ],
       }),
     }),

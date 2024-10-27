@@ -16,6 +16,9 @@ class TradeHistory extends TradeBase {
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
+
+  @Column('bigint')
+  version: number;
 }
 
 export default TradeHistory;

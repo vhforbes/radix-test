@@ -1,22 +1,22 @@
-export enum TradeOperationStatus {
+export enum TradeStatus {
   Awaiting = 'awaiting',
   Active = 'active',
   Closed = 'closed',
   Canceled = 'canceled',
 }
 
-export enum TradeOperationMarkets {
+export enum TradeMarkets {
   Futures = 'futures',
   Sport = 'spot',
 }
 
-export enum TradeOperationResult {
+export enum TradeResult {
   Gain = 'gain',
   Loss = 'loss',
   Even = 'even',
 }
 
-export enum TradeOperationDirection {
+export enum TradeDirection {
   Short = 'short',
   Long = 'long',
 }

@@ -1,10 +1,16 @@
 import { Module } from '@nestjs/common';
 import { TradeSubscriber } from './subscribers/trade.subscriber';
 import { TradeController } from './trade.controller';
-import { TradeService } from './trade.service';
+import { TradeService } from './services/trade.service';
+import { UserModule } from '@src/user/user.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import Trade from './entities/trade.entity';
+import { TradeHistoryService } from './services/trade-history.service';
+import TradeHistory from './entities/tade-history.entity';
 
 @Module({
-  providers: [TradeSubscriber, TradeService],
+  imports: [UserModule, TypeOrmModule.forFeature([Trade, TradeHistory])],
+  providers: [TradeSubscriber, TradeService, TradeHistoryService],
   controllers: [TradeController],
 })
 export class TradeModule {}

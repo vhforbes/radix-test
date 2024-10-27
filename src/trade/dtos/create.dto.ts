@@ -1,18 +1,18 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { TradeOperationDirection, TradeOperationMarkets } from '../trade.enum';
+import { TradeDirection, TradeMarkets } from '../trade.enum';
 
-export class CreateTradeOperationDto {
+export class CreateTradeDto {
   @IsNotEmpty()
   @IsString()
   readonly ticker: string;
 
   @IsNotEmpty()
   @IsString()
-  @IsEnum(TradeOperationMarkets)
+  @IsEnum(TradeMarkets)
   readonly market: string;
 
   @IsNotEmpty()
-  @IsEnum(TradeOperationDirection)
+  @IsEnum(TradeDirection)
   readonly direction: string;
 
   // -- Entry --
