@@ -7,7 +7,6 @@ import {
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { UpdateCommunityDto } from './dto/update-community.dto';
 import { UserReq } from '@src/auth/interfaces';
-import { UserService } from '@src/user/user.service';
 import { IsNull, Repository } from 'typeorm';
 import Community from './community.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,7 +21,6 @@ export class CommunityService {
     @InjectRepository(Community)
     private communityRepository: Repository<Community>,
     private membershipService: MembershipService,
-    private userService: UserService,
   ) {}
 
   async create(userReq: UserReq, createCommunityDto: CreateCommunityDto) {
@@ -41,6 +39,7 @@ export class CommunityService {
 
     await this.communityRepository.save(community);
 
+    // Set creator as Owner
     await this.membershipService.assignMembershipRole(
       userReq.user_id,
       community.id,

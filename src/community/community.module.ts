@@ -3,15 +3,10 @@ import { CommunityService } from './community.service';
 import { CommunityController } from './community.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import Community from './community.entity';
-import { UserModule } from '@src/user/user.module';
 import { MembershipModule } from '@src/membership/membership.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Community]),
-    UserModule,
-    MembershipModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Community]), MembershipModule],
   providers: [CommunityService],
   controllers: [CommunityController],
 })

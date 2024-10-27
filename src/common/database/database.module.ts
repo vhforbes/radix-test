@@ -6,6 +6,7 @@ import { Membership } from '@src/membership/membership.entity';
 import { Notification } from '@src/notification/notification.entity';
 import { SubscriptionPlan } from '@src/subscription/subscription-plan.entity';
 import { Subscription } from '@src/subscription/subscription.entity';
+import Trade from '@src/trade/entities/trade.entity';
 import User from 'src/user/user.entity';
 
 @Module({
@@ -28,6 +29,7 @@ import User from 'src/user/user.entity';
           Notification,
           Subscription,
           SubscriptionPlan,
+          Trade,
         ],
       }),
     }),

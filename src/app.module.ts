@@ -7,6 +7,7 @@ import { CommunityModule } from './community/community.module';
 import { MembershipModule } from './membership/membership.module';
 import { NotificationModule } from './notification/notification.module';
 import { SubscriptionModule } from './subscription/subscription.module';
+import { TradeModule } from './trade/trade.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
     MembershipModule,
     NotificationModule,
     SubscriptionModule,
+    TradeModule,
   ],
   controllers: [],
   providers: [],
