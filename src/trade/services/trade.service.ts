@@ -6,6 +6,8 @@ import { UserReq } from '@src/auth/interfaces';
 import { TradeDirection, TradeStatus } from '../trade.enum';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { MessageBrokerConfig } from '@src/common/message-broker/message-broker.config';
 
 @Injectable()
 export class TradeService {
@@ -13,6 +15,7 @@ export class TradeService {
     private userService: UserService,
     @InjectRepository(Trade)
     private tradeRepository: Repository<Trade>,
+    private readonly amqpConnection: AmqpConnection,
   ) {}
 
   async create(
@@ -89,6 +92,12 @@ export class TradeService {
     //   createdTrade.stopDistance = stopDistance;
 
     await this.tradeRepository.save(newTrade);
+
+    await this.amqpConnection.publish(
+      MessageBrokerConfig.trade.exchanges.tradeExchange,
+      MessageBrokerConfig.trade.routingKeys.tradeCreated2,
+      newTrade,
+    );
 
     // ---- TODO ----
     //

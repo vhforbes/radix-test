@@ -51,6 +51,26 @@ export class EmailService {
     }
   }
 
+  private getEmailTemplate(
+    templateName: string,
+    variables: Record<string, string>,
+  ) {
+    const templatePath = path.resolve(
+      __dirname,
+      `./templates/${templateName}.html`,
+    );
+
+    let template = fs.readFileSync(templatePath, 'utf8');
+
+    // * Chat GPT Magic *
+    Object.keys(variables).forEach((key) => {
+      const regex = new RegExp(`{{${key}}}`, 'g');
+      template = template.replace(regex, variables[key]);
+    });
+
+    return template;
+  }
+
   async sendUserCreationEmail(
     to: string,
     name: string,
@@ -77,23 +97,13 @@ export class EmailService {
     await this.sendEmail(to, subject, htmlBody, textBody);
   }
 
-  private getEmailTemplate(
-    templateName: string,
-    variables: Record<string, string>,
-  ) {
-    const templatePath = path.resolve(
-      __dirname,
-      `./templates/${templateName}.html`,
-    );
-
-    let template = fs.readFileSync(templatePath, 'utf8');
-
-    // * Chat GPT Magic *
-    Object.keys(variables).forEach((key) => {
-      const regex = new RegExp(`{{${key}}}`, 'g');
-      template = template.replace(regex, variables[key]);
+  async sendNewTrade(to: string, ticker: string) {
+    const subject = 'New Trade';
+    const htmlBody = this.getEmailTemplate('trade/new-trade', {
+      ticker,
     });
+    const textBody = `New trade for ${ticker} !`;
 
-    return template;
+    await this.sendEmail(to, subject, htmlBody, textBody);
   }
 }

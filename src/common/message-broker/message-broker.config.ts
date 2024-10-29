@@ -12,4 +12,17 @@ export const MessageBrokerConfig = {
       userRecover: 'user.recover',
     },
   },
+  trade: {
+    exchanges: {
+      tradeExchange: 'trade-exchange',
+    },
+    queues: {
+      tradeEmailQueue: 'trade-email-queue',
+      tradeAnalyticsQueue: 'trade-analytics-queue',
+    },
+    routingKeys: {
+      tradeCreated: 'trade.created',
+      tradeCreated2: 'trade.created2',
+    },
+  },
 };

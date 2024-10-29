@@ -22,7 +22,5 @@ export class TradeSubscriber implements EntitySubscriberInterface<Trade> {
 
   async afterInsert(event: InsertEvent<Trade>) {
     this.tradeHistoryService.create(event.entity);
-
-    console.log(`BEFORE USER INSERTED: `, event.entity);
   }
 }

@@ -6,7 +6,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import Trade from '../entities/trade.entity';
 import { userMock } from '@test/mocks/user/user.mock';
 import { UserReq } from '@src/auth/interfaces';
-import { TradeDirection, TradeStatus } from '../trade.enum';
+import { TradeDirection } from '../trade.enum';
 
 describe('TradeService', () => {
   let service: TradeService;

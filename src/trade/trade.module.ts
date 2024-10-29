@@ -7,9 +7,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import Trade from './entities/trade.entity';
 import { TradeHistoryService } from './services/trade-history.service';
 import TradeHistory from './entities/tade-history.entity';
+import { NotificationModule } from '@src/notification/notification.module';
 
 @Module({
-  imports: [UserModule, TypeOrmModule.forFeature([Trade, TradeHistory])],
+  imports: [
+    UserModule,
+    TypeOrmModule.forFeature([Trade, TradeHistory]),
+    NotificationModule,
+  ],
   providers: [TradeSubscriber, TradeService, TradeHistoryService],
   controllers: [TradeController],
 })
