@@ -50,23 +50,23 @@ export class NotificationService {
 
   @RabbitRPC({
     exchange: MessageBrokerConfig.trade.exchanges.tradeExchange,
-    queue: MessageBrokerConfig.trade.queues.tradeEmailQueue,
+    queue: MessageBrokerConfig.trade.queues.newTradeQueue,
     routingKey: MessageBrokerConfig.trade.routingKeys.tradeCreated,
   })
   public async handleNewTrade(msg: Trade, amqpMsg: any) {
     this.logger.log(
-      `Received handleNewTrade message: ${JSON.stringify(msg)}, Routing Key: ${amqpMsg.fields.routingKey}, FIELDS: ${JSON.stringify(amqpMsg.fields)}`,
+      `Received NEW TRADE message: ${JSON.stringify(msg)}, Routing Key: ${amqpMsg.fields.routingKey}, FIELDS: ${JSON.stringify(amqpMsg.fields)}`,
     );
   }
 
   @RabbitRPC({
     exchange: MessageBrokerConfig.trade.exchanges.tradeExchange,
-    queue: MessageBrokerConfig.trade.queues.tradeEmailQueue,
-    routingKey: MessageBrokerConfig.trade.routingKeys.tradeCreated2,
+    queue: MessageBrokerConfig.trade.queues.updateTradeQueue,
+    routingKey: MessageBrokerConfig.trade.routingKeys.tradeUpdated,
   })
   public async handleNewTrade2(msg: Trade, amqpMsg: any) {
     this.logger.log(
-      `Received handleNewTrade2 message: ${JSON.stringify(msg)}, Routing Key: ${amqpMsg.fields.routingKey}, FIELDS: ${JSON.stringify(amqpMsg.fields)}`,
+      `Received UPDATED TRADE message: ${JSON.stringify(msg)}, Routing Key: ${amqpMsg.fields.routingKey}, FIELDS: ${JSON.stringify(amqpMsg.fields)}`,
     );
 
     return 'message sent';

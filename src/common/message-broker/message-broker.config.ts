@@ -17,12 +17,12 @@ export const MessageBrokerConfig = {
       tradeExchange: 'trade-exchange',
     },
     queues: {
-      tradeEmailQueue: 'trade-email-queue',
-      tradeAnalyticsQueue: 'trade-analytics-queue',
+      newTradeQueue: 'new-trade-queue',
+      updateTradeQueue: 'update-trade-queue',
     },
     routingKeys: {
       tradeCreated: 'trade.created',
-      tradeCreated2: 'trade.created2',
+      tradeUpdated: 'trade.updated',
     },
   },
 };

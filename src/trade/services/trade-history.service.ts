@@ -12,6 +12,8 @@ export class TradeHistoryService {
   ) {}
 
   async create(trade: Trade) {
+    console.log(trade);
+
     const tradeHistory = this.tradeHistoryRepository.create(trade);
 
     const existingVersions = await this.tradeHistoryRepository.find({

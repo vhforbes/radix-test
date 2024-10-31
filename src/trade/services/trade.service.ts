@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import Trade from '../entities/trade.entity';
-import { CreateTradeDto } from '../dtos/create.dto';
+import { CreateTradeDto } from '../dtos/create-trade.dto';
 import { UserService } from '@src/user/user.service';
 import { UserReq } from '@src/auth/interfaces';
 import { TradeDirection, TradeStatus } from '../trade.enum';
@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { MessageBrokerConfig } from '@src/common/message-broker/message-broker.config';
+import { UpdateTradeDto } from '../dtos/update-trade.dto';
 
 @Injectable()
 export class TradeService {
@@ -17,6 +18,16 @@ export class TradeService {
     private tradeRepository: Repository<Trade>,
     private readonly amqpConnection: AmqpConnection,
   ) {}
+
+  async findOne(id: string) {
+    const trade = await this.tradeRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+
+    return trade;
+  }
 
   async create(
     createTradeDto: CreateTradeDto,
@@ -93,22 +104,35 @@ export class TradeService {
 
     await this.tradeRepository.save(newTrade);
 
+    console.log(newTrade);
+
     await this.amqpConnection.publish(
       MessageBrokerConfig.trade.exchanges.tradeExchange,
-      MessageBrokerConfig.trade.routingKeys.tradeCreated2,
+      MessageBrokerConfig.trade.routingKeys.tradeCreated,
       newTrade,
     );
-
-    // ---- TODO ----
-    //
-    // Start a CRON checker to check prices
-    //
-    // ---- TODO ----
 
     return newTrade;
   }
 
-  validEntryOrders(trade: Trade) {
+  async update(id: string, updatedTradeOperationDto: UpdateTradeDto) {
+    const tradeToUpdate = await this.findOne(id);
+
+    if (!tradeToUpdate) {
+      throw new BadRequestException('Trade not found');
+    }
+
+    const updatedTrade = {
+      ...tradeToUpdate,
+      ...updatedTradeOperationDto,
+    };
+
+    await this.tradeRepository.update(id, updatedTrade);
+
+    return `Trade Updated`;
+  }
+
+  private validEntryOrders(trade: Trade) {
     if (trade.direction === TradeDirection.Long) {
       if (this.isAscending(trade.entry_orders)) {
         return true;
@@ -124,7 +148,7 @@ export class TradeService {
     return false;
   }
 
-  isAscending(array: number[]) {
+  private isAscending(array: number[]) {
     for (let i = 0; i < array.length - 1; i++) {
       if (array[i] > array[i + 1]) {
         return false;
@@ -133,7 +157,7 @@ export class TradeService {
     return true;
   }
 
-  isDescending(array: number[]) {
+  private isDescending(array: number[]) {
     for (let i = 0; i < array.length - 1; i++) {
       if (array[i] < array[i + 1]) {
         return false;

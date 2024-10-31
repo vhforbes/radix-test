@@ -3,6 +3,7 @@ import {
   EntitySubscriberInterface,
   EventSubscriber,
   InsertEvent,
+  UpdateEvent,
 } from 'typeorm';
 import Trade from '../entities/trade.entity';
 import { TradeHistoryService } from '../services/trade-history.service';
@@ -21,6 +22,12 @@ export class TradeSubscriber implements EntitySubscriberInterface<Trade> {
   }
 
   async afterInsert(event: InsertEvent<Trade>) {
-    this.tradeHistoryService.create(event.entity);
+    await this.tradeHistoryService.create(event.entity);
+  }
+
+  async afterUpdate(event: UpdateEvent<Trade>) {
+    console.log(event.entity);
+
+    await this.tradeHistoryService.create(event.entity as Trade);
   }
 }

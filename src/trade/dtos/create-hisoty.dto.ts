@@ -1,5 +1,5 @@
 import { IsNumber, IsString, IsUUID } from 'class-validator';
-import { CreateTradeDto } from './create.dto';
+import { CreateTradeDto } from './create-trade.dto';
 
 export class TradeHistoryDto extends CreateTradeDto {
   @IsUUID()
