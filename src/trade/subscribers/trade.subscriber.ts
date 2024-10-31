@@ -26,8 +26,6 @@ export class TradeSubscriber implements EntitySubscriberInterface<Trade> {
   }
 
   async afterUpdate(event: UpdateEvent<Trade>) {
-    console.log(event.entity);
-
     await this.tradeHistoryService.create(event.entity as Trade);
   }
 }

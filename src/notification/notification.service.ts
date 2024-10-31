@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EmailService } from './email/email.service';
-import { RabbitRPC } from '@golevelup/nestjs-rabbitmq';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { MessageBrokerConfig } from '@src/common/message-broker/message-broker.config';
 import { UserCreatedEvent } from '@src/common/message-broker/interfaces/user-created-event.interface';
 import { UserRecoverEvent } from '@src/common/message-broker/interfaces/user-recover-event.interface';
@@ -13,9 +13,9 @@ export class NotificationService {
     private logger: Logger,
   ) {}
 
-  @RabbitRPC({
+  @RabbitSubscribe({
     exchange: MessageBrokerConfig.user.exchanges.userExchange,
-    queue: MessageBrokerConfig.user.queues.userEmailQueue,
+    queue: MessageBrokerConfig.user.queues.newUserEmailQueue,
     routingKey: MessageBrokerConfig.user.routingKeys.userCreated,
   })
   public async handleUserCreation(msg: UserCreatedEvent, amqpMsg: any) {
@@ -30,8 +30,9 @@ export class NotificationService {
     );
   }
 
-  @RabbitRPC({
+  @RabbitSubscribe({
     exchange: MessageBrokerConfig.user.exchanges.userExchange,
+    queue: MessageBrokerConfig.user.queues.recoverUserEmailQueue,
     routingKey: MessageBrokerConfig.user.routingKeys.userRecover,
   })
   public async handleUserRecovery(msg: UserRecoverEvent, amqpMsg: any) {
@@ -48,7 +49,7 @@ export class NotificationService {
     return 'message sent';
   }
 
-  @RabbitRPC({
+  @RabbitSubscribe({
     exchange: MessageBrokerConfig.trade.exchanges.tradeExchange,
     queue: MessageBrokerConfig.trade.queues.newTradeQueue,
     routingKey: MessageBrokerConfig.trade.routingKeys.tradeCreated,
@@ -59,7 +60,7 @@ export class NotificationService {
     );
   }
 
-  @RabbitRPC({
+  @RabbitSubscribe({
     exchange: MessageBrokerConfig.trade.exchanges.tradeExchange,
     queue: MessageBrokerConfig.trade.queues.updateTradeQueue,
     routingKey: MessageBrokerConfig.trade.routingKeys.tradeUpdated,
@@ -68,7 +69,5 @@ export class NotificationService {
     this.logger.log(
       `Received UPDATED TRADE message: ${JSON.stringify(msg)}, Routing Key: ${amqpMsg.fields.routingKey}, FIELDS: ${JSON.stringify(amqpMsg.fields)}`,
     );
-
-    return 'message sent';
   }
 }

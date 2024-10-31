@@ -104,11 +104,11 @@ export abstract class TradeBase {
 
   // -- Other Data --
   @Column({ nullable: true })
-  tradingViewLink?: string;
+  trading_view_link?: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({ type: 'timestamptz' })
-  updatedAt: Date;
+  updated_at: Date;
 }
