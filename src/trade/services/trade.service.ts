@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import Trade from '../entities/trade.entity';
 import { CreateTradeDto } from '../dtos/create-trade.dto';
 import { UserService } from '@src/user/user.service';
@@ -13,6 +13,7 @@ import { UpdateTradeDto } from '../dtos/update-trade.dto';
 @Injectable()
 export class TradeService {
   constructor(
+    private logger: Logger,
     private userService: UserService,
     @InjectRepository(Trade)
     private tradeRepository: Repository<Trade>,
@@ -77,6 +78,12 @@ export class TradeService {
     );
 
     return processedTrade;
+  }
+
+  async checkPriceTrigger(trade: Trade, currentPrice: number) {
+    this.logger.debug(
+      `Comparing trade: ${JSON.stringify(trade)} with its current price: ${currentPrice}`,
+    );
   }
 
   private processTrade(newTrade: Trade) {
