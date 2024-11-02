@@ -20,3 +20,7 @@ export enum TradeDirection {
   Short = 'short',
   Long = 'long',
 }
+
+export enum Exchange {
+  BINANCE = 'binance',
+}

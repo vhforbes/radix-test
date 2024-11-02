@@ -8,6 +8,7 @@ import { MembershipModule } from './membership/membership.module';
 import { NotificationModule } from './notification/notification.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { TradeModule } from './trade/trade.module';
+import { WebsocketModule } from './websocket/websocket.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TradeModule } from './trade/trade.module';
     NotificationModule,
     SubscriptionModule,
     TradeModule,
+    WebsocketModule,
   ],
   controllers: [],
   providers: [],

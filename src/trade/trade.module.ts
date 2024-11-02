@@ -8,16 +8,15 @@ import Trade from './entities/trade.entity';
 import { TradeHistoryService } from './services/trade-history.service';
 import TradeHistory from './entities/tade-history.entity';
 import { NotificationModule } from '@src/notification/notification.module';
-import { PriceModule } from './price/price.module';
 
 @Module({
   imports: [
     UserModule,
     TypeOrmModule.forFeature([Trade, TradeHistory]),
     NotificationModule,
-    PriceModule,
   ],
   providers: [TradeSubscriber, TradeService, TradeHistoryService],
   controllers: [TradeController],
+  exports: [TradeService],
 })
 export class TradeModule {}

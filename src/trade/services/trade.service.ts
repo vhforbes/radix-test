@@ -5,7 +5,7 @@ import { UserService } from '@src/user/user.service';
 import { UserReq } from '@src/auth/interfaces';
 import { TradeDirection, TradeStatus } from '../trade.enum';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { MessageBrokerConfig } from '@src/common/message-broker/message-broker.config';
 import { UpdateTradeDto } from '../dtos/update-trade.dto';
@@ -19,6 +19,24 @@ export class TradeService {
     private tradeRepository: Repository<Trade>,
     private readonly amqpConnection: AmqpConnection,
   ) {}
+
+  async getTrades(options?: Partial<Trade>) {
+    if (!options || Object.keys(options).length === 0) {
+      return await this.tradeRepository.find();
+    }
+
+    const where: FindOptionsWhere<Trade> = {};
+
+    for (const [key, value] of Object.entries(options)) {
+      if (value !== undefined && value !== null) {
+        (where as any)[key] = value;
+      }
+    }
+
+    return await this.tradeRepository.find({
+      where,
+    });
+  }
 
   async findOne(id: string) {
     const trade = await this.tradeRepository.findOne({

@@ -7,6 +7,12 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import {
+  Exchange,
+  TradeDirection,
+  TradeResult,
+  TradeStatus,
+} from '../trade.enum';
 
 export abstract class TradeBase {
   @ManyToOne(() => User)
@@ -19,7 +25,7 @@ export abstract class TradeBase {
 
   // -- General Data --
   @Column()
-  ticker: string;
+  pair: string;
 
   @Column({
     nullable: true,
@@ -28,9 +34,15 @@ export abstract class TradeBase {
   market: string;
 
   @Column({
+    nullable: true,
+    enum: Exchange,
+  })
+  exchange: Exchange;
+
+  @Column({
     type: 'varchar',
     length: 10,
-    enum: ['long', 'short'],
+    enum: TradeDirection,
   })
   direction: string;
 
@@ -41,7 +53,7 @@ export abstract class TradeBase {
   @Column({
     type: 'varchar',
     length: 10,
-    enum: ['awaiting', 'active', 'closed', 'canceled'],
+    enum: TradeStatus,
   })
   status: string;
 
@@ -95,7 +107,7 @@ export abstract class TradeBase {
     nullable: true,
     type: 'varchar',
     length: 10,
-    enum: ['loss', 'even', 'gain'],
+    enum: TradeResult,
   })
   result?: string;
 
