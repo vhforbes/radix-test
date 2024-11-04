@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { WebSocketOrchestratorService } from './websocker-orchestrator.service';
-import { TradeModule } from '@src/trade/trade.module';
+import { BinanceConnectionService } from './exchanges/binance-connection.service';
 
-@Module({ imports: [TradeModule], providers: [WebSocketOrchestratorService] })
+@Module({
+  providers: [WebSocketOrchestratorService, BinanceConnectionService],
+  exports: [WebSocketOrchestratorService],
+})
 export class WebsocketModule {}

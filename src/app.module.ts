@@ -9,6 +9,7 @@ import { NotificationModule } from './notification/notification.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { TradeModule } from './trade/trade.module';
 import { WebsocketModule } from './websocket/websocket.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { WebsocketModule } from './websocket/websocket.module';
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
+    EventEmitterModule.forRoot(),
     UserModule,
     AuthModule,
     CommunityModule,

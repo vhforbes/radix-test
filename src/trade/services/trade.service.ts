@@ -9,6 +9,7 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { MessageBrokerConfig } from '@src/common/message-broker/message-broker.config';
 import { UpdateTradeDto } from '../dtos/update-trade.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class TradeService {
@@ -18,6 +19,7 @@ export class TradeService {
     @InjectRepository(Trade)
     private tradeRepository: Repository<Trade>,
     private readonly amqpConnection: AmqpConnection,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async getTrades(options?: Partial<Trade>) {
@@ -70,6 +72,8 @@ export class TradeService {
       processedTrade,
     );
 
+    this.eventEmitter.emit('trade.created');
+
     return processedTrade;
   }
 
@@ -95,14 +99,12 @@ export class TradeService {
       processedTrade,
     );
 
+    this.eventEmitter.emit('trade.updated');
+
     return processedTrade;
   }
 
-  async checkPriceTrigger(trade: Trade, currentPrice: number) {
-    this.logger.debug(
-      `Comparing trade: ${JSON.stringify(trade)} with its current price: ${currentPrice}`,
-    );
-  }
+  // ---- Private Methods ----
 
   private processTrade(newTrade: Trade) {
     if (!this.validEntryOrders(newTrade))

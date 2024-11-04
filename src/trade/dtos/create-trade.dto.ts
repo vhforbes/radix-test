@@ -1,10 +1,14 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { TradeDirection, TradeMarkets } from '../trade.enum';
+import { Exchange, TradeDirection, TradeMarkets } from '../trade.enum';
 
 export class CreateTradeDto {
   @IsNotEmpty()
   @IsString()
-  readonly ticker: string;
+  readonly pair: string;
+
+  @IsNotEmpty()
+  @IsEnum(Exchange)
+  readonly exchange: Exchange;
 
   @IsNotEmpty()
   @IsString()
