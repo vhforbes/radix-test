@@ -3,7 +3,7 @@ import Trade from '../entities/trade.entity';
 import { CreateTradeDto } from '../dtos/create-trade.dto';
 import { UserService } from '@src/user/user.service';
 import { UserReq } from '@src/auth/interfaces';
-import { TradeDirection, TradeStatus } from '../trade.enum';
+import { TradeDirection, TradeResult, TradeStatus } from '../trade.enum';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
@@ -104,7 +104,96 @@ export class TradeService {
     return processedTrade;
   }
 
+  checkTradeUpdate(trade: Trade, currentPrice: number) {
+    this.takeProfitTrigger(trade, currentPrice);
+    this.stopTrigger(trade, currentPrice);
+  }
+
   // ---- Private Methods ----
+  private takeProfitTrigger(trade: Trade, currentPrice: number) {
+    if (trade.status !== TradeStatus.Active) {
+      this.logger.warn(
+        `Attempted to take profit on a non-active trade ${JSON.stringify(trade)}`,
+      );
+      return;
+    }
+
+    let takeProfitOrderHit = false;
+    const ordersHit = [];
+
+    trade.take_profit_orders.forEach((order) => {
+      if (trade.direction === TradeDirection.Long && order <= currentPrice) {
+        takeProfitOrderHit = true;
+        ordersHit.push(order);
+      }
+
+      if (trade.direction === TradeDirection.Short && order <= currentPrice) {
+        takeProfitOrderHit = true;
+        ordersHit.push(order);
+      }
+    });
+
+    // Update:
+    // // closed_percentage
+    // triggered_take_profit_orders
+    // effective_take_profit_price (ON CLOSE ONLY)
+
+    // // console.log(ordersHit);
+
+    // i want to reduce the sum but only yhe ammount of orders hit
+
+    const closed_percentage: number = trade.percentual_by_take_profit.reduce(
+      (sum, percentage, index) => {
+        if (index < ordersHit.length) {
+          return sum + percentage;
+        }
+
+        return sum;
+      },
+    );
+
+    // TODO: How Will I calculate the take profit price according to percentuals and triggered orders
+    let effective_take_profit_price = null;
+
+    this.update(trade.id, {
+      closed_percentage,
+      triggered_take_profit_orders: ordersHit,
+      status:
+        closed_percentage === 100 ? TradeStatus.Closed : TradeStatus.Active,
+    });
+
+    return takeProfitOrderHit;
+  }
+
+  private stopTrigger(trade: Trade, currentPrice: number) {
+    if (
+      trade.direction === TradeDirection.Long &&
+      trade.stop_price >= currentPrice
+    ) {
+      this.update(trade.id, {
+        status: TradeStatus.Closed,
+        result: TradeResult.Loss,
+        triggered_stop: true,
+      });
+
+      return true;
+    }
+
+    if (
+      trade.direction === TradeDirection.Short &&
+      trade.stop_price <= currentPrice
+    ) {
+      this.update(trade.id, {
+        status: TradeStatus.Closed,
+        result: TradeResult.Loss,
+        triggered_stop: true,
+      });
+
+      return true;
+    }
+
+    return;
+  }
 
   private processTrade(newTrade: Trade) {
     if (!this.validEntryOrders(newTrade))

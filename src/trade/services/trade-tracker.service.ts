@@ -8,7 +8,7 @@ import { PriceUpdatedEvent } from '@src/websocket/events/price-updated.event';
 
 @Injectable()
 export class TradeTrackerService {
-  trackingTrades: Trade[];
+  trades: Trade[];
 
   constructor(
     private tradeService: TradeService,
@@ -19,14 +19,19 @@ export class TradeTrackerService {
 
   @OnEvent('price.updated')
   async checkTrade(payload: PriceUpdatedEvent) {
-    // console.log(payload.price);
+    const matchingTrades = this.trades.filter(
+      (trade) =>
+        trade.exchange === payload.exchange && trade.pair === payload.pair,
+    );
+
+    matchingTrades.forEach((trade) =>
+      this.tradeService.checkTradeUpdate(trade, payload.price),
+    );
   }
 
   @OnEvent('trade.updated')
   @OnEvent('trade.created')
   async trackTrades() {
-    console.log('Tracking trades');
-
     const activeTrades = await this.tradeService.getTrades({
       status: TradeStatus.Awaiting,
     });
@@ -35,10 +40,8 @@ export class TradeTrackerService {
       status: TradeStatus.Active,
     });
 
-    const trades = activeTrades.concat(awaitingTrades);
+    this.trades = activeTrades.concat(awaitingTrades);
 
-    this.trackingTrades = trades;
-
-    this.webSocketOrchestratorService.openWsConnectionsNeeded(trades);
+    this.webSocketOrchestratorService.openWsConnectionsNeeded(this.trades);
   }
 }
