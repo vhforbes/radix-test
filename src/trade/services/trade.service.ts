@@ -109,8 +109,7 @@ export class TradeService {
     this.stopTrigger(trade, currentPrice);
   }
 
-  // ---- Private Methods ----
-  private takeProfitTrigger(trade: Trade, currentPrice: number) {
+  takeProfitTrigger(trade: Trade, currentPrice: number) {
     if (trade.status !== TradeStatus.Active) {
       this.logger.warn(
         `Attempted to take profit on a non-active trade ${JSON.stringify(trade)}`,
@@ -133,14 +132,7 @@ export class TradeService {
       }
     });
 
-    // Update:
-    // // closed_percentage
-    // triggered_take_profit_orders
-    // effective_take_profit_price (ON CLOSE ONLY)
-
-    // // console.log(ordersHit);
-
-    // i want to reduce the sum but only yhe ammount of orders hit
+    console.log(ordersHit);
 
     const closed_percentage: number = trade.percentual_by_take_profit.reduce(
       (sum, percentage, index) => {
@@ -152,20 +144,23 @@ export class TradeService {
       },
     );
 
-    // TODO: How Will I calculate the take profit price according to percentuals and triggered orders
-    let effective_take_profit_price = null;
+    const tradeClosed = closed_percentage === 100;
+
+    const effective_take_profit_price = tradeClosed
+      ? this.calculateEffectiveTakeProfit(trade)
+      : null;
 
     this.update(trade.id, {
       closed_percentage,
       triggered_take_profit_orders: ordersHit,
-      status:
-        closed_percentage === 100 ? TradeStatus.Closed : TradeStatus.Active,
+      status: tradeClosed ? TradeStatus.Closed : TradeStatus.Active,
+      effective_take_profit_price,
     });
 
     return takeProfitOrderHit;
   }
 
-  private stopTrigger(trade: Trade, currentPrice: number) {
+  stopTrigger(trade: Trade, currentPrice: number) {
     if (
       trade.direction === TradeDirection.Long &&
       trade.stop_price >= currentPrice
@@ -194,6 +189,8 @@ export class TradeService {
 
     return;
   }
+
+  // ---- Private Methods ----
 
   private processTrade(newTrade: Trade) {
     if (!this.validEntryOrders(newTrade))
@@ -348,5 +345,33 @@ export class TradeService {
     const percentualDistance = difference / trade.expected_median_price;
 
     return percentualDistance;
+  }
+
+  private calculateEffectiveTakeProfit(trade: Trade): number {
+    // console.log('Entering calculateEffectiveTakeProfit');
+
+    console.log(trade);
+
+    if (
+      trade.take_profit_orders.length !== trade.percentual_by_take_profit.length
+    ) {
+      console.error('Trigger error');
+
+      this.logger.error(
+        'Take profit orders and percentuals lenght don`t match',
+      );
+      throw new Error('Take profit orders and percentuals lenght don`t match');
+    }
+
+    let effectiveTakeProfit = 0;
+
+    trade.take_profit_orders.forEach((tp, i) => {
+      const percentualClosed = trade.percentual_by_take_profit[i] / 100;
+      const wheightedTp = tp * percentualClosed;
+
+      effectiveTakeProfit += wheightedTp;
+    });
+
+    return effectiveTakeProfit;
   }
 }

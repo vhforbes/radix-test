@@ -6,7 +6,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import Trade from '../entities/trade.entity';
 import { userMock } from '@test/mocks/user/user.mock';
 import { UserReq } from '@src/auth/interfaces';
-import { Exchange, TradeDirection } from '../trade.enum';
+import { Exchange, TradeDirection, TradeStatus } from '../trade.enum';
 import { Logger } from '@nestjs/common';
 import { amqpConnectionMock } from '@test/mocks/rabbitmq/amqp-connection.mock';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -71,5 +71,41 @@ describe('TradeService', () => {
     expect(result).toHaveProperty('trader');
     expect(result.trader).not.toHaveProperty('password');
     expect(result).toEqual(expect.objectContaining(createTradeDto));
+  });
+
+  it('should call check take profit trigger and make necessary calculations', async () => {
+    const tradeToCalc = {
+      pair: 'BNBUSDT',
+      market: 'futures',
+      exchange: Exchange.BINANCE,
+      direction: TradeDirection.Long,
+      status: TradeStatus.Active,
+
+      // entry_orders: [100, 200, 300],
+      // percentual_by_entry: [30, 30, 40],
+      take_profit_orders: [150, 250, 350],
+      percentual_by_take_profit: [50, 30, 20],
+      closed_percentage: 100,
+
+      stop_price: 95.5,
+    } as Partial<Trade>;
+
+    const calculateEffectiveTakeProfitSpy = jest.spyOn(
+      service as any,
+      'calculateEffectiveTakeProfit',
+    );
+
+    expect(calculateEffectiveTakeProfitSpy).toHaveBeenCalledWith(tradeToCalc);
+
+    const expectedTakeProfit = service['calculateEffectiveTakeProfit'](
+      tradeToCalc as Trade,
+    );
+
+    // expect(calculateEffectiveTakeProfitSpy).toHaveBeenCalledWith(tradeToCalc);
+    // const expectedTakeProfit = 220;
+
+    expect(expectedTakeProfit).toBe(220);
+
+    calculateEffectiveTakeProfitSpy.mockRestore();
   });
 });
