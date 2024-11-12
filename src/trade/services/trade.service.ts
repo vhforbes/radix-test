@@ -109,7 +109,7 @@ export class TradeService {
     this.stopTrigger(trade, currentPrice);
   }
 
-  takeProfitTrigger(trade: Trade, currentPrice: number) {
+  async takeProfitTrigger(trade: Trade, currentPrice: number) {
     if (trade.status !== TradeStatus.Active) {
       this.logger.warn(
         `Attempted to take profit on a non-active trade ${JSON.stringify(trade)}`,
@@ -117,22 +117,17 @@ export class TradeService {
       return;
     }
 
-    let takeProfitOrderHit = false;
     const ordersHit = [];
 
     trade.take_profit_orders.forEach((order) => {
       if (trade.direction === TradeDirection.Long && order <= currentPrice) {
-        takeProfitOrderHit = true;
         ordersHit.push(order);
       }
 
       if (trade.direction === TradeDirection.Short && order <= currentPrice) {
-        takeProfitOrderHit = true;
         ordersHit.push(order);
       }
     });
-
-    console.log(ordersHit);
 
     const closed_percentage: number = trade.percentual_by_take_profit.reduce(
       (sum, percentage, index) => {
@@ -150,14 +145,14 @@ export class TradeService {
       ? this.calculateEffectiveTakeProfit(trade)
       : null;
 
-    this.update(trade.id, {
+    const updatedTrade = await this.update(trade.id, {
       closed_percentage,
       triggered_take_profit_orders: ordersHit,
       status: tradeClosed ? TradeStatus.Closed : TradeStatus.Active,
       effective_take_profit_price,
     });
 
-    return takeProfitOrderHit;
+    return updatedTrade;
   }
 
   stopTrigger(trade: Trade, currentPrice: number) {
@@ -348,14 +343,10 @@ export class TradeService {
   }
 
   private calculateEffectiveTakeProfit(trade: Trade): number {
-    // console.log('Entering calculateEffectiveTakeProfit');
-
-    console.log(trade);
-
     if (
       trade.take_profit_orders.length !== trade.percentual_by_take_profit.length
     ) {
-      console.error('Trigger error');
+      console.error('Take profit orders and percentuals lenght don`t match');
 
       this.logger.error(
         'Take profit orders and percentuals lenght don`t match',

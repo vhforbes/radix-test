@@ -73,39 +73,70 @@ describe('TradeService', () => {
     expect(result).toEqual(expect.objectContaining(createTradeDto));
   });
 
-  it('should call check take profit trigger and make necessary calculations', async () => {
-    const tradeToCalc = {
+  it('should call takeProfitTrigger trigger and take profit on partial position', async () => {
+    const tradeToTakeProfit = {
       pair: 'BNBUSDT',
       market: 'futures',
       exchange: Exchange.BINANCE,
       direction: TradeDirection.Long,
       status: TradeStatus.Active,
-
-      // entry_orders: [100, 200, 300],
-      // percentual_by_entry: [30, 30, 40],
+      entry_orders: [100, 200, 300],
+      percentual_by_entry: [30, 40, 30],
       take_profit_orders: [150, 250, 350],
       percentual_by_take_profit: [50, 30, 20],
+      closed_percentage: 0,
+
+      stop_price: 90,
+    } as Trade;
+
+    const takeProfitResult = {
+      ...tradeToTakeProfit,
+      closed_percentage: 50,
+      effective_take_profit_price: null,
+      expected_median_price: 200,
+      expected_median_take_profit_price: 220,
+      stop_distance: 0.55,
+      triggered_take_profit_orders: [150],
+    } as Trade;
+
+    tradeRepositoryMock.useValue.findOne.mockReturnValue(tradeToTakeProfit);
+
+    const result = await service.takeProfitTrigger(tradeToTakeProfit, 160);
+
+    expect(result).toEqual(takeProfitResult);
+  });
+
+  it('should call takeProfitTrigger trigger and take profit on entire position', async () => {
+    const tradeToTakeProfit = {
+      pair: 'BNBUSDT',
+      market: 'futures',
+      exchange: Exchange.BINANCE,
+      direction: TradeDirection.Long,
+      status: TradeStatus.Active,
+      entry_orders: [100, 200, 300],
+      percentual_by_entry: [30, 40, 30],
+      take_profit_orders: [150, 250, 350],
+      percentual_by_take_profit: [50, 30, 20],
+      closed_percentage: 0,
+
+      stop_price: 90,
+    } as Trade;
+
+    const takeProfitResult = {
+      ...tradeToTakeProfit,
+      status: TradeStatus.Closed,
       closed_percentage: 100,
+      effective_take_profit_price: 220,
+      expected_median_price: 200,
+      expected_median_take_profit_price: 220,
+      stop_distance: 0.55,
+      triggered_take_profit_orders: [150, 250, 350],
+    } as Trade;
 
-      stop_price: 95.5,
-    } as Partial<Trade>;
+    tradeRepositoryMock.useValue.findOne.mockReturnValue(tradeToTakeProfit);
 
-    const calculateEffectiveTakeProfitSpy = jest.spyOn(
-      service as any,
-      'calculateEffectiveTakeProfit',
-    );
+    const result = await service.takeProfitTrigger(tradeToTakeProfit, 360);
 
-    expect(calculateEffectiveTakeProfitSpy).toHaveBeenCalledWith(tradeToCalc);
-
-    const expectedTakeProfit = service['calculateEffectiveTakeProfit'](
-      tradeToCalc as Trade,
-    );
-
-    // expect(calculateEffectiveTakeProfitSpy).toHaveBeenCalledWith(tradeToCalc);
-    // const expectedTakeProfit = 220;
-
-    expect(expectedTakeProfit).toBe(220);
-
-    calculateEffectiveTakeProfitSpy.mockRestore();
+    expect(result).toEqual(takeProfitResult);
   });
 });
