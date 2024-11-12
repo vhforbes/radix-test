@@ -104,16 +104,14 @@ export class TradeService {
     return processedTrade;
   }
 
-  checkTradeUpdate(trade: Trade, currentPrice: number) {
-    this.takeProfitTrigger(trade, currentPrice);
-    this.stopTrigger(trade, currentPrice);
+  async checkTradeUpdate(trade: Trade, currentPrice: number) {
+    await this.entryOrderTrigger(trade, currentPrice);
+    await this.takeProfitTrigger(trade, currentPrice);
+    await this.stopTrigger(trade, currentPrice);
   }
 
   async entryOrderTrigger(trade: Trade, currentPrice: number) {
     if (trade.status === TradeStatus.Closed) {
-      this.logger.warn(
-        `Attempted to enter on a closed trade ${JSON.stringify(trade)}`,
-      );
       return;
     }
 
@@ -121,11 +119,11 @@ export class TradeService {
 
     trade.entry_orders.forEach((order) => {
       if (trade.direction === TradeDirection.Long && order >= currentPrice) {
-        ordersHit.push(order);
+        ordersHit.push(currentPrice);
       }
 
       if (trade.direction === TradeDirection.Short && order <= currentPrice) {
-        ordersHit.push(order);
+        ordersHit.push(currentPrice);
       }
     });
 
@@ -138,6 +136,9 @@ export class TradeService {
         return sum;
       },
     );
+
+    if (ordersHit.length === trade.triggered_entry_orders?.length) return;
+    if (!ordersHit.length) return;
 
     const effective_median_price = this.calculateEffectiveMedianPrice({
       ...trade,
@@ -156,9 +157,6 @@ export class TradeService {
 
   async takeProfitTrigger(trade: Trade, currentPrice: number) {
     if (trade.status !== TradeStatus.Active) {
-      this.logger.warn(
-        `Attempted to take profit on a non-active trade ${JSON.stringify(trade)}`,
-      );
       return;
     }
 
@@ -166,13 +164,15 @@ export class TradeService {
 
     trade.take_profit_orders.forEach((order) => {
       if (trade.direction === TradeDirection.Long && order <= currentPrice) {
-        ordersHit.push(order);
+        ordersHit.push(currentPrice);
       }
 
       if (trade.direction === TradeDirection.Short && order <= currentPrice) {
-        ordersHit.push(order);
+        ordersHit.push(currentPrice);
       }
     });
+
+    if (!ordersHit.length) return;
 
     const closed_percentage: number = trade.percentual_by_take_profit.reduce(
       (sum, percentage, index) => {
@@ -185,6 +185,8 @@ export class TradeService {
     );
 
     const tradeClosed = closed_percentage === 100;
+
+    console.log('CLOSING TRADE: ', tradeClosed);
 
     const effective_take_profit_price = tradeClosed
       ? this.calculateEffectiveTakeProfit(trade)
@@ -205,7 +207,9 @@ export class TradeService {
       trade.direction === TradeDirection.Long &&
       trade.stop_price >= currentPrice
     ) {
-      this.update(trade.id, {
+      console.log('triggering stop long');
+
+      await this.update(trade.id, {
         status: TradeStatus.Closed,
         result: TradeResult.Loss,
         triggered_stop: true,
@@ -218,6 +222,8 @@ export class TradeService {
       trade.direction === TradeDirection.Short &&
       trade.stop_price <= currentPrice
     ) {
+      console.log('triggering stop short');
+
       await this.update(trade.id, {
         status: TradeStatus.Closed,
         result: TradeResult.Loss,
