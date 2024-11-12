@@ -51,7 +51,7 @@ describe('TradeService', () => {
       market: 'futures',
       exchange: Exchange.BINANCE,
       direction: TradeDirection.Long,
-      entry_orders: [100, 200, 300],
+      entry_orders: [300, 200, 100],
       percentual_by_entry: [30, 40, 30],
       take_profit_orders: [150, 250, 350],
       percentual_by_take_profit: [50, 30, 20],
@@ -67,10 +67,76 @@ describe('TradeService', () => {
     expect(result).toHaveProperty('market', 'futures');
     expect(result).toHaveProperty('exchange', 'binance');
     expect(result).toHaveProperty('direction', 'long');
-    expect(result).toHaveProperty('entry_orders', [100, 200, 300]);
+    expect(result).toHaveProperty('entry_orders', [300, 200, 100]);
     expect(result).toHaveProperty('trader');
     expect(result.trader).not.toHaveProperty('password');
     expect(result).toEqual(expect.objectContaining(createTradeDto));
+  });
+
+  it('should call entryOrderTrigger trigger and entry on partial position', async () => {
+    const tradeToEnter = {
+      pair: 'BNBUSDT',
+      market: 'futures',
+      exchange: Exchange.BINANCE,
+      direction: TradeDirection.Long,
+      status: TradeStatus.Awaiting,
+      entry_orders: [100, 90, 80],
+      percentual_by_entry: [25, 25, 50],
+      take_profit_orders: [150, 250, 350],
+      percentual_by_take_profit: [50, 30, 20],
+      closed_percentage: 0,
+      stop_price: 70,
+    } as Trade;
+
+    const tradeToEnterResult = {
+      ...tradeToEnter,
+      status: TradeStatus.Active,
+      entry_percentage: 50,
+      effective_median_price: 95,
+      expected_median_price: 87.5,
+      expected_median_take_profit_price: 220,
+      stop_distance: 0.2,
+      triggered_entry_orders: [100, 90],
+    } as Trade;
+
+    tradeRepositoryMock.useValue.findOne.mockReturnValue(tradeToEnterResult);
+
+    const result = await service.entryOrderTrigger(tradeToEnter, 89);
+
+    expect(result).toEqual(tradeToEnterResult);
+  });
+
+  it('should call entryOrderTrigger trigger and entry on entire position', async () => {
+    const tradeToEnter = {
+      pair: 'BNBUSDT',
+      market: 'futures',
+      exchange: Exchange.BINANCE,
+      direction: TradeDirection.Long,
+      status: TradeStatus.Awaiting,
+      entry_orders: [100, 90, 80],
+      percentual_by_entry: [25, 25, 50],
+      take_profit_orders: [150, 250, 350],
+      percentual_by_take_profit: [50, 30, 20],
+      closed_percentage: 0,
+      stop_price: 70,
+    } as Trade;
+
+    const tradeToEnterResult = {
+      ...tradeToEnter,
+      status: TradeStatus.Active,
+      entry_percentage: 100,
+      effective_median_price: 87.5,
+      expected_median_price: 87.5,
+      expected_median_take_profit_price: 220,
+      stop_distance: 0.2,
+      triggered_entry_orders: [100, 90, 80],
+    } as Trade;
+
+    tradeRepositoryMock.useValue.findOne.mockReturnValue(tradeToEnterResult);
+
+    const result = await service.entryOrderTrigger(tradeToEnter, 80);
+
+    expect(result).toEqual(tradeToEnterResult);
   });
 
   it('should call takeProfitTrigger trigger and take profit on partial position', async () => {
@@ -80,7 +146,7 @@ describe('TradeService', () => {
       exchange: Exchange.BINANCE,
       direction: TradeDirection.Long,
       status: TradeStatus.Active,
-      entry_orders: [100, 200, 300],
+      entry_orders: [300, 200, 100],
       percentual_by_entry: [30, 40, 30],
       take_profit_orders: [150, 250, 350],
       percentual_by_take_profit: [50, 30, 20],
@@ -113,7 +179,7 @@ describe('TradeService', () => {
       exchange: Exchange.BINANCE,
       direction: TradeDirection.Long,
       status: TradeStatus.Active,
-      entry_orders: [100, 200, 300],
+      entry_orders: [300, 200, 100],
       percentual_by_entry: [30, 40, 30],
       take_profit_orders: [150, 250, 350],
       percentual_by_take_profit: [50, 30, 20],

@@ -109,6 +109,51 @@ export class TradeService {
     this.stopTrigger(trade, currentPrice);
   }
 
+  async entryOrderTrigger(trade: Trade, currentPrice: number) {
+    if (trade.status === TradeStatus.Closed) {
+      this.logger.warn(
+        `Attempted to enter on a closed trade ${JSON.stringify(trade)}`,
+      );
+      return;
+    }
+
+    const ordersHit = [];
+
+    trade.entry_orders.forEach((order) => {
+      if (trade.direction === TradeDirection.Long && order >= currentPrice) {
+        ordersHit.push(order);
+      }
+
+      if (trade.direction === TradeDirection.Short && order <= currentPrice) {
+        ordersHit.push(order);
+      }
+    });
+
+    const entry_percentage: number = trade.percentual_by_entry.reduce(
+      (sum, percentage, index) => {
+        if (index < ordersHit.length) {
+          return sum + percentage;
+        }
+
+        return sum;
+      },
+    );
+
+    const effective_median_price = this.calculateEffectiveMedianPrice({
+      ...trade,
+      triggered_entry_orders: ordersHit,
+    });
+
+    const updatedTrade = await this.update(trade.id, {
+      entry_percentage,
+      triggered_entry_orders: ordersHit,
+      status: TradeStatus.Active,
+      effective_median_price,
+    });
+
+    return updatedTrade;
+  }
+
   async takeProfitTrigger(trade: Trade, currentPrice: number) {
     if (trade.status !== TradeStatus.Active) {
       this.logger.warn(
@@ -155,7 +200,7 @@ export class TradeService {
     return updatedTrade;
   }
 
-  stopTrigger(trade: Trade, currentPrice: number) {
+  async stopTrigger(trade: Trade, currentPrice: number) {
     if (
       trade.direction === TradeDirection.Long &&
       trade.stop_price >= currentPrice
@@ -173,7 +218,7 @@ export class TradeService {
       trade.direction === TradeDirection.Short &&
       trade.stop_price <= currentPrice
     ) {
-      this.update(trade.id, {
+      await this.update(trade.id, {
         status: TradeStatus.Closed,
         result: TradeResult.Loss,
         triggered_stop: true,
@@ -264,13 +309,13 @@ export class TradeService {
 
   private validEntryOrders(trade: Trade) {
     if (trade.direction === TradeDirection.Long) {
-      if (this.isAscending(trade.entry_orders)) {
+      if (this.isDescending(trade.entry_orders)) {
         return true;
       }
     }
 
     if (trade.direction === TradeDirection.Short) {
-      if (this.isDescending(trade.entry_orders)) {
+      if (this.isAscending(trade.entry_orders)) {
         return true;
       }
     }
@@ -364,5 +409,32 @@ export class TradeService {
     });
 
     return effectiveTakeProfit;
+  }
+
+  private calculateEffectiveMedianPrice(trade: Trade): number {
+    let effectiveMedianPrice = 0;
+
+    // Filter entry orders and percentages to only consider triggered orders
+    const triggeredOrders = trade.entry_orders.filter((_, i) =>
+      trade.triggered_entry_orders.includes(trade.entry_orders[i]),
+    );
+    const triggeredPercentages = trade.percentual_by_entry.filter((_, i) =>
+      trade.triggered_entry_orders.includes(trade.entry_orders[i]),
+    );
+
+    // Calculate the sum of triggered percentages
+    const totalTriggeredPercentage = triggeredPercentages.reduce(
+      (a, b) => a + b,
+      0,
+    );
+
+    // Calculate the effective median price based on normalized weights
+    triggeredOrders.forEach((tp, i) => {
+      const normalizedWeight =
+        triggeredPercentages[i] / totalTriggeredPercentage;
+      effectiveMedianPrice += tp * normalizedWeight;
+    });
+
+    return effectiveMedianPrice;
   }
 }

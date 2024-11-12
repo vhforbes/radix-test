@@ -58,6 +58,9 @@ export abstract class TradeBase {
   status: string;
 
   @Column({ nullable: true })
+  entry_percentage?: number;
+
+  @Column({ nullable: true })
   closed_percentage?: number;
 
   // -- Entry Orders --
