@@ -11,6 +11,19 @@ import { MessageBrokerConfig } from '@src/common/message-broker/message-broker.c
 import { UpdateTradeDto } from '../dtos/update-trade.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
+// [] Triggers
+// - [x] Stop
+// - [x] Entry Position
+// - [x] Take Profit
+
+// [] Manual
+// - [] Close partial
+// - [] Close total
+
+// [] Results / Ongoing
+// - [] PnL
+// - [] R:R
+
 @Injectable()
 export class TradeService {
   constructor(
