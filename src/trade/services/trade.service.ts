@@ -24,6 +24,11 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 // - [] PnL
 // - [] R:R
 
+// [] Extras
+// - Print of entry
+// - Print of exit
+// - Daily journal mechanism ??
+
 @Injectable()
 export class TradeService {
   constructor(
@@ -199,8 +204,6 @@ export class TradeService {
 
     const tradeClosed = closed_percentage === 100;
 
-    console.log('CLOSING TRADE: ', tradeClosed);
-
     const effective_take_profit_price = tradeClosed
       ? this.calculateEffectiveTakeProfit(trade)
       : null;
@@ -220,8 +223,6 @@ export class TradeService {
       trade.direction === TradeDirection.Long &&
       trade.stop_price >= currentPrice
     ) {
-      console.log('triggering stop long');
-
       await this.update(trade.id, {
         status: TradeStatus.Closed,
         result: TradeResult.Loss,
@@ -235,8 +236,6 @@ export class TradeService {
       trade.direction === TradeDirection.Short &&
       trade.stop_price <= currentPrice
     ) {
-      console.log('triggering stop short');
-
       await this.update(trade.id, {
         status: TradeStatus.Closed,
         result: TradeResult.Loss,
@@ -433,12 +432,9 @@ export class TradeService {
   private calculateEffectiveMedianPrice(trade: Trade): number {
     let effectiveMedianPrice = 0;
 
-    // Filter entry orders and percentages to only consider triggered orders
-    const triggeredOrders = trade.entry_orders.filter((_, i) =>
-      trade.triggered_entry_orders.includes(trade.entry_orders[i]),
-    );
-    const triggeredPercentages = trade.percentual_by_entry.filter((_, i) =>
-      trade.triggered_entry_orders.includes(trade.entry_orders[i]),
+    const triggeredPercentages = trade.percentual_by_entry.splice(
+      0,
+      trade.triggered_entry_orders.length,
     );
 
     // Calculate the sum of triggered percentages
@@ -448,7 +444,7 @@ export class TradeService {
     );
 
     // Calculate the effective median price based on normalized weights
-    triggeredOrders.forEach((tp, i) => {
+    trade.triggered_entry_orders.forEach((tp, i) => {
       const normalizedWeight =
         triggeredPercentages[i] / totalTriggeredPercentage;
       effectiveMedianPrice += tp * normalizedWeight;

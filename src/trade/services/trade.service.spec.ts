@@ -92,11 +92,12 @@ describe('TradeService', () => {
       ...tradeToEnter,
       status: TradeStatus.Active,
       entry_percentage: 50,
-      effective_median_price: 95,
+      effective_median_price: 89,
       expected_median_price: 87.5,
       expected_median_take_profit_price: 220,
       stop_distance: 0.2,
-      triggered_entry_orders: [100, 90],
+      triggered_entry_orders: [89, 89],
+      percentual_by_entry: [25, 25, 50],
     } as Trade;
 
     tradeRepositoryMock.useValue.findOne.mockReturnValue(tradeToEnterResult);
@@ -108,7 +109,7 @@ describe('TradeService', () => {
 
   it('should call entryOrderTrigger trigger and entry on entire position', async () => {
     const tradeToEnter = {
-      pair: 'BNBUSDT',
+      pair: 'XNBUSDT',
       market: 'futures',
       exchange: Exchange.BINANCE,
       direction: TradeDirection.Long,
@@ -125,16 +126,17 @@ describe('TradeService', () => {
       ...tradeToEnter,
       status: TradeStatus.Active,
       entry_percentage: 100,
-      effective_median_price: 87.5,
+      effective_median_price: 75,
       expected_median_price: 87.5,
       expected_median_take_profit_price: 220,
       stop_distance: 0.2,
-      triggered_entry_orders: [100, 90, 80],
+      triggered_entry_orders: [75, 75, 75],
+      percentual_by_entry: [25, 25, 50],
     } as Trade;
 
     tradeRepositoryMock.useValue.findOne.mockReturnValue(tradeToEnterResult);
 
-    const result = await service.entryOrderTrigger(tradeToEnter, 80);
+    const result = await service.entryOrderTrigger(tradeToEnter, 75);
 
     expect(result).toEqual(tradeToEnterResult);
   });
@@ -162,7 +164,7 @@ describe('TradeService', () => {
       expected_median_price: 200,
       expected_median_take_profit_price: 220,
       stop_distance: 0.55,
-      triggered_take_profit_orders: [150],
+      triggered_take_profit_orders: [160],
     } as Trade;
 
     tradeRepositoryMock.useValue.findOne.mockReturnValue(tradeToTakeProfit);
@@ -196,7 +198,7 @@ describe('TradeService', () => {
       expected_median_price: 200,
       expected_median_take_profit_price: 220,
       stop_distance: 0.55,
-      triggered_take_profit_orders: [150, 250, 350],
+      triggered_take_profit_orders: [360, 360, 360],
     } as Trade;
 
     tradeRepositoryMock.useValue.findOne.mockReturnValue(tradeToTakeProfit);
