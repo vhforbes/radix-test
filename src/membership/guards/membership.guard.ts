@@ -12,7 +12,6 @@ export class MembershipRoleGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // Gets roles set in the controller when injecting the Guard
     const roles = this.reflector.get(Roles, context.getHandler());
 
     if (!roles) {
@@ -21,13 +20,16 @@ export class MembershipRoleGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
 
+    const communityId = request.body.community_id;
     const user = request.user;
+
+    if (!user || !communityId) {
+      return false;
+    }
 
     if (user.role === UserRole.ADMIN) {
       return true;
     }
-
-    const communityId = request.params.id;
 
     return await this.membershipService.hasMembershipRole(
       communityId,

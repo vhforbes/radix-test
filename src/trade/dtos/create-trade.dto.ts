@@ -1,7 +1,11 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsString, IsUUID } from 'class-validator';
 import { Exchange, TradeDirection, TradeMarkets } from '../trade.enum';
 
 export class CreateTradeDto {
+  @IsNotEmpty()
+  @IsUUID()
+  readonly community_id: string;
+
   @IsNotEmpty()
   @IsString()
   readonly pair: string;

@@ -10,6 +10,7 @@ import TradeHistory from './entities/tade-history.entity';
 import { NotificationModule } from '@src/notification/notification.module';
 import { WebsocketModule } from '@src/websocket/websocket.module';
 import { TradeTrackerService } from './services/trade-tracker.service';
+import { MembershipModule } from '@src/membership/membership.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { TradeTrackerService } from './services/trade-tracker.service';
     TypeOrmModule.forFeature([Trade, TradeHistory]),
     NotificationModule,
     WebsocketModule,
+    MembershipModule,
   ],
   providers: [
     TradeSubscriber,

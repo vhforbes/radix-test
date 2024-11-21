@@ -20,12 +20,14 @@ import { RolesGuard } from '@src/auth/guards/roles.guard';
 import { Reflector } from '@nestjs/core';
 import { MembershipRoleGuard } from '@src/membership/guards/membership.guard';
 import { MembershipRole } from '@src/membership/enums/membership-roles.enum';
+import { MembershipService } from '@src/membership/membership.service';
 
 @ApiTags('community')
 @Controller('community')
 export class CommunityController {
   constructor(
     private readonly communityService: CommunityService,
+    private readonly membershipService: MembershipService,
     private readonly reflector: Reflector, // Instantiating for RolesGuard
   ) {}
 
@@ -61,5 +63,29 @@ export class CommunityController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.communityService.remove(id);
+  }
+
+  @UseGuards(JwtAuthGuard, MembershipRoleGuard)
+  @Roles([MembershipRole.OWNER])
+  @Post('/assign-role')
+  assignRole(
+    @Body()
+    {
+      community_id,
+      email,
+      role,
+    }: {
+      community_id: string;
+      email: string;
+      role: MembershipRole;
+    },
+  ) {
+    console.log('Community ID:', community_id);
+
+    return this.membershipService.assignMembershipRole(
+      community_id,
+      email,
+      role,
+    );
   }
 }
