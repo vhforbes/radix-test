@@ -3,7 +3,7 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { CreateSensorReadingDto } from './dtos/create-sensor-reading.dto';
 import { SensorReadingService } from './sensor-reading.service';
 
-@Controller('sensor-readings')
+@Controller('sensor-reading')
 export class SensorReadingController {
   constructor(private readonly sensorReadingsService: SensorReadingService) {}
 

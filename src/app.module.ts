@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { NotificationModule } from './notification/notification.module';
 import { SensorReadingModule } from './sensor-reading/sensor-reading.module';
+import { EquipmentModule } from './equipment/equipment.module';
+import { CsvUploadModule } from './csv-upload/csv-upload.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { SensorReadingModule } from './sensor-reading/sensor-reading.module';
     AuthModule,
     NotificationModule,
     SensorReadingModule,
+    EquipmentModule,
+    CsvUploadModule,
   ],
   controllers: [],
   providers: [],

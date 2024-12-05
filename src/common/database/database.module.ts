@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CsvUpload } from '@src/csv-upload/csv-upload.entity';
+import { Equipment } from '@src/equipment/equipment.entity';
 import { SensorReading } from '@src/sensor-reading/sensor-reading.entity';
 import User from 'src/user/user.entity';
 
@@ -17,7 +19,7 @@ import User from 'src/user/user.entity';
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
         synchronize: true, // !! Set to false in production !!
-        entities: [User, SensorReading],
+        entities: [User, SensorReading, Equipment, CsvUpload],
       }),
     }),
   ],
