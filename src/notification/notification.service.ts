@@ -4,7 +4,6 @@ import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { MessageBrokerConfig } from '@src/common/message-broker/message-broker.config';
 import { UserCreatedEvent } from '@src/common/message-broker/interfaces/user-created-event.interface';
 import { UserRecoverEvent } from '@src/common/message-broker/interfaces/user-recover-event.interface';
-import Trade from '@src/trade/entities/trade.entity';
 
 @Injectable()
 export class NotificationService {
@@ -47,27 +46,5 @@ export class NotificationService {
     );
 
     return 'message sent';
-  }
-
-  @RabbitSubscribe({
-    exchange: MessageBrokerConfig.trade.exchanges.tradeExchange,
-    queue: MessageBrokerConfig.trade.queues.newTradeQueue,
-    routingKey: MessageBrokerConfig.trade.routingKeys.tradeCreated,
-  })
-  public async handleNewTrade(msg: Trade, amqpMsg: any) {
-    this.logger.log(
-      `Received NEW TRADE message: ${JSON.stringify(msg)}, Routing Key: ${amqpMsg.fields.routingKey}, FIELDS: ${JSON.stringify(amqpMsg.fields)}`,
-    );
-  }
-
-  @RabbitSubscribe({
-    exchange: MessageBrokerConfig.trade.exchanges.tradeExchange,
-    queue: MessageBrokerConfig.trade.queues.updateTradeQueue,
-    routingKey: MessageBrokerConfig.trade.routingKeys.tradeUpdated,
-  })
-  public async handleNewTrade2(msg: Trade, amqpMsg: any) {
-    this.logger.log(
-      `Received UPDATED TRADE message: ${JSON.stringify(msg)}, Routing Key: ${amqpMsg.fields.routingKey}, FIELDS: ${JSON.stringify(amqpMsg.fields)}`,
-    );
   }
 }

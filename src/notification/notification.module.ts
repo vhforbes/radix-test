@@ -20,7 +20,6 @@ import { MessageBrokerConfig } from '@src/common/message-broker/message-broker.c
       ],
       uri: 'amqp://localhost:5672',
 
-      // What are channels ??
       channels: {
         'channel-1': {
           prefetchCount: 15,

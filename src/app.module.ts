@@ -3,13 +3,10 @@ import { CommonModule } from './common/common.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { CommunityModule } from './community/community.module';
-import { MembershipModule } from './membership/membership.module';
-import { NotificationModule } from './notification/notification.module';
-import { SubscriptionModule } from './subscription/subscription.module';
-import { TradeModule } from './trade/trade.module';
-import { WebsocketModule } from './websocket/websocket.module';
+
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { NotificationModule } from './notification/notification.module';
+import { SensorReadingModule } from './sensor-reading/sensor-reading.module';
 
 @Module({
   imports: [
@@ -20,12 +17,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     EventEmitterModule.forRoot(),
     UserModule,
     AuthModule,
-    CommunityModule,
-    MembershipModule,
     NotificationModule,
-    SubscriptionModule,
-    TradeModule,
-    WebsocketModule,
+    SensorReadingModule,
   ],
   controllers: [],
   providers: [],

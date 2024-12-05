@@ -1,10 +1,7 @@
-import Comunity from '@src/community/community.entity';
-import { Membership } from '@src/membership/membership.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -29,12 +26,6 @@ class User {
 
   @Column({ type: 'boolean', default: false })
   confirmed: boolean;
-
-  @OneToMany(() => Comunity, (comunity) => comunity.owner)
-  comunities_owned: Comunity[];
-
-  @OneToMany(() => Membership, (membership) => membership.user)
-  memberships: Membership[];
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;

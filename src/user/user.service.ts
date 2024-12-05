@@ -65,9 +65,6 @@ export class UserService {
         userCreatedMessage,
       );
     } catch (error) {
-      // There may be a need to retry if messages fail to enter the queue...
-      // For now ill just log
-
       this.logger.error('Failed to send message to broker', error.message);
     }
 

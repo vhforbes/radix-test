@@ -1,13 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import Community from '@src/community/community.entity';
-import { Membership } from '@src/membership/membership.entity';
-import { Notification } from '@src/notification/notification.entity';
-import { SubscriptionPlan } from '@src/subscription/subscription-plan.entity';
-import { Subscription } from '@src/subscription/subscription.entity';
-import TradeHistory from '@src/trade/entities/tade-history.entity';
-import Trade from '@src/trade/entities/trade.entity';
+import { SensorReading } from '@src/sensor-reading/sensor-reading.entity';
 import User from 'src/user/user.entity';
 
 @Module({
@@ -22,17 +16,8 @@ import User from 'src/user/user.entity';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        synchronize: true, // Set to false in production
-        entities: [
-          User,
-          Community,
-          Membership,
-          Notification,
-          Subscription,
-          SubscriptionPlan,
-          Trade,
-          TradeHistory,
-        ],
+        synchronize: true, // !! Set to false in production !!
+        entities: [User, SensorReading],
       }),
     }),
   ],

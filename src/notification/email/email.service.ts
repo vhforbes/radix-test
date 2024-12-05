@@ -47,6 +47,7 @@ export class EmailService {
     try {
       await this.sesClient.sendEmail(emailContent);
     } catch (error) {
+      this.logger.log('EXPECTED FAIL - SES NOT CONFIGURED');
       this.logger.error('Failed to send email', { error: error.message });
     }
   }
