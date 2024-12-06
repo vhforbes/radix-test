@@ -68,6 +68,8 @@ export class CsvUploadService {
           continue;
         }
 
+        // I can add more validations as needed according to each rows
+
         const dto = {
           equipmentId: row.equipmentId,
           timestamp,
