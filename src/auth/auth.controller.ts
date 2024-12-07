@@ -18,6 +18,9 @@ export class AuthController {
   @Post('login')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async login(@Request() req, @Body() body: AuthDto) {
+    console.log('LOGIN TRY');
+    console.log(req.user);
+
     return this.authService.login(req.user);
   }
 
