@@ -48,6 +48,7 @@ export class SensorReadingService {
 
     return this.sensorReadingRepository.find({
       where: { equipmentId },
+      order: { timestamp: 'ASC' },
     });
   }
 

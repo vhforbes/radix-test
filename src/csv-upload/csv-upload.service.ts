@@ -90,4 +90,10 @@ export class CsvUploadService {
       await this.csvUploadRepository.save(upload);
     }
   }
+
+  async getAllCsvUploads(): Promise<CsvUpload[]> {
+    return this.csvUploadRepository.find({
+      order: { createdAt: 'DESC' }, // Sort by latest first
+    });
+  }
 }
